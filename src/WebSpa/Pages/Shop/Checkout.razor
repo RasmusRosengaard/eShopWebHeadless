@@ -1,0 +1,73 @@
+@page "/basket/checkout"
+@attribute [Authorize]
+@inject BasketState BasketState
+@inject NavigationManager Navigation
+
+<PageTitle>Checkout - Microsoft.eShopOnWeb</PageTitle>
+
+<section class="esh-catalog-hero">
+    <div class="container">
+        <img class="esh-catalog-title" src="images/main_banner_text.png" />
+    </div>
+</section>
+
+<div class="container">
+    <h1>Review</h1>
+    @if (BasketState.Basket.Items.Any())
+    {
+        @foreach (var item in BasketState.Basket.Items)
+        {
+            <article class="esh-basket-items row">
+                <section class="esh-basket-item esh-basket-item--middle col-3">
+                    <img class="esh-basket-image" src="@item.PictureUrl" />
+                </section>
+                <section class="esh-basket-item esh-basket-item--middle col-3">@item.ProductName</section>
+                <section class="esh-basket-item esh-basket-item--middle col-2">$ @item.UnitPrice.ToString("N2")</section>
+                <section class="esh-basket-item esh-basket-item--middle col-2">@item.Quantity</section>
+                <section class="esh-basket-item esh-basket-item--middle esh-basket-item--mark col-2">$ @Math.Round(item.Quantity * item.UnitPrice, 2).ToString("N2")</section>
+            </article>
+        }
+        <article class="esh-basket-items row">
+            <section class="esh-basket-item col-10"></section>
+            <section class="esh-basket-item esh-basket-item--mark col-2">$ @BasketState.Basket.Total.ToString("N2")</section>
+        </article>
+        <div class="row">
+            <section class="esh-basket-item col-6">
+                <a href="basket" class="btn esh-basket-checkout text-white">[ Back ]</a>
+            </section>
+            <section class="esh-basket-item col-6 text-right">
+                <button class="btn esh-basket-checkout" disabled="@submitting" @onclick="PayNow">[ Pay Now ]</button>
+            </section>
+        </div>
+        @if (error != null)
+        {
+            <p class="text-danger">@error</p>
+        }
+    }
+    else
+    {
+        <h3>Basket is empty.</h3>
+    }
+</div>
+
+@code {
+    private bool submitting;
+    private string error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await BasketState.RefreshAsync();
+    }
+
+    private async Task PayNow()
+    {
+        submitting = true;
+        if (await BasketState.CheckoutAsync())
+        {
+            Navigation.NavigateTo("basket/success");
+            return;
+        }
+        error = "Checkout failed.";
+        submitting = false;
+    }
+}

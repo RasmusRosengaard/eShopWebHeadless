@@ -1,0 +1,34 @@
+@inject Microsoft.Extensions.Options.IOptions<BlazorShared.BaseUrlConfiguration> BaseUrls
+
+<div class="esh-identity">
+    <AuthorizeView>
+        <Authorized>
+            <section class="esh-identity-section">
+                <div class="esh-identity-name">@context.User.Identity.Name</div>
+                <img class="esh-identity-image" src="images/arrow-down.png">
+            </section>
+            <section class="esh-identity-drop">
+                <AuthorizeView Roles=@BlazorShared.Authorization.Constants.Roles.ADMINISTRATORS Context="adminContext">
+                    @* BlazorAdmin is a separate client with its own login *@
+                    <a class="esh-identity-item" href="@BaseUrls.Value.AdminBase">
+                        <div class="esh-identity-name esh-identity-name--upper">Admin</div>
+                    </a>
+                </AuthorizeView>
+                <a class="esh-identity-item" href="orders">
+                    <div class="esh-identity-name esh-identity-name--upper">My orders</div>
+                </a>
+                <a class="esh-identity-item" href="logout">
+                    <div class="esh-identity-name esh-identity-name--upper">Log Out</div>
+                    <img class="esh-identity-image" src="images/logout.png">
+                </a>
+            </section>
+        </Authorized>
+        <NotAuthorized>
+            <section class="esh-identity-section">
+                <div class="esh-identity-item">
+                    <a href="login" class="esh-identity-name esh-identity-name--upper">Login</a>
+                </div>
+            </section>
+        </NotAuthorized>
+    </AuthorizeView>
+</div>

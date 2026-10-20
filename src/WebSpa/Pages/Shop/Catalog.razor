@@ -1,0 +1,110 @@
+@page "/"
+@inject ShopCatalogService CatalogService
+@inject ICatalogLookupDataService<CatalogBrand> BrandService
+@inject ICatalogLookupDataService<CatalogType> TypeService
+@inject BasketState BasketState
+@inject NavigationManager Navigation
+
+<PageTitle>Catalog - Microsoft.eShopOnWeb</PageTitle>
+
+<section class="esh-catalog-hero">
+    <div class="container">
+        <img class="esh-catalog-title" src="images/main_banner_text.png" />
+    </div>
+</section>
+<section class="esh-catalog-filters">
+    <div class="container">
+        <label class="esh-catalog-label" data-title="brand">
+            <select class="esh-catalog-filter" @bind="brandFilter">
+                <option value="">All</option>
+                @foreach (var brand in brands)
+                {
+                    <option value="@brand.Id">@brand.Name</option>
+                }
+            </select>
+        </label>
+        <label class="esh-catalog-label" data-title="type">
+            <select class="esh-catalog-filter" @bind="typeFilter">
+                <option value="">All</option>
+                @foreach (var type in types)
+                {
+                    <option value="@type.Id">@type.Name</option>
+                }
+            </select>
+        </label>
+        <input class="esh-catalog-send" type="image" src="images/arrow-right.svg" @onclick="ApplyFilter" />
+    </div>
+</section>
+<div class="container">
+    @if (page == null)
+    {
+        <Spinner />
+    }
+    else if (page.CatalogItems.Any())
+    {
+        <Pager PageIndex="pageIndex" PageCount="page.PageCount" OnPageChanged="GoToPage" />
+        <div class="esh-catalog-items row">
+            @foreach (var item in page.CatalogItems)
+            {
+                <div class="esh-catalog-item col-md-4">
+                    <img class="esh-catalog-thumbnail" src="@item.PictureUri" />
+                    <input class="esh-catalog-button" type="button" value="[ ADD TO BASKET ]" @onclick="() => AddToBasket(item.Id)" />
+                    <div class="esh-catalog-name"><span>@item.Name</span></div>
+                    <div class="esh-catalog-price"><span>@item.Price.ToString("N2")</span></div>
+                </div>
+            }
+        </div>
+        <Pager PageIndex="pageIndex" PageCount="page.PageCount" OnPageChanged="GoToPage" />
+    }
+    else
+    {
+        <div class="esh-catalog-items row">
+            THERE ARE NO RESULTS THAT MATCH YOUR SEARCH
+        </div>
+    }
+</div>
+
+@code {
+    private const int ITEMS_PER_PAGE = 10;
+
+    private List<CatalogBrand> brands = new();
+    private List<CatalogType> types = new();
+    private PagedCatalogItemResponse page;
+    private int pageIndex;
+    private string brandFilter = "";
+    private string typeFilter = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        brands = await BrandService.List();
+        types = await TypeService.List();
+        await LoadPage();
+    }
+
+    private async Task ApplyFilter()
+    {
+        pageIndex = 0;
+        await LoadPage();
+    }
+
+    private async Task GoToPage(int index)
+    {
+        pageIndex = index;
+        await LoadPage();
+    }
+
+    private async Task LoadPage()
+    {
+        page = null;
+        page = await CatalogService.ListPagedAsync(pageIndex, ITEMS_PER_PAGE, ToId(brandFilter), ToId(typeFilter));
+    }
+
+    private async Task AddToBasket(int catalogItemId)
+    {
+        // Web redirected to the basket page after "add to basket", so do the same.
+        await BasketState.AddItemAsync(catalogItemId);
+        Navigation.NavigateTo("basket");
+    }
+
+    private static int? ToId(string value) => int.TryParse(value, out var id) ? id : null;
+}

@@ -27,12 +27,6 @@
         {
             if (firstRender)
             {
-                var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-
-                if (authState.User == null)
-                {
-                    await new Route(JSRuntime).RouteOutside("/Identity/Account/Login");
-                }
                 CallRequestRefresh();
             }
 

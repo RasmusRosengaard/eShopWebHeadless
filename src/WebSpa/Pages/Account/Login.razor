@@ -1,0 +1,63 @@
+@page "/login"
+@inject AccountService AccountService
+@inject NavigationManager Navigation
+
+<PageTitle>Log in - Microsoft.eShopOnWeb</PageTitle>
+
+<div class="container account-login-container">
+    <h2>Log in</h2>
+    <hr />
+    <EditForm Model="model" OnValidSubmit="Submit">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="text-danger" />
+        @if (error != null)
+        {
+            <div class="text-danger">@error</div>
+        }
+        <div class="form-group">
+            <label for="email">Email</label>
+            <InputText id="email" class="form-control" @bind-Value="model.Email" />
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <InputText id="password" type="password" class="form-control" @bind-Value="model.Password" />
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-default" disabled="@submitting">Log in</button>
+        </div>
+        <p><a href="register?returnUrl=@Uri.EscapeDataString(ReturnUrl ?? "/")">Register as a new user</a></p>
+        <p>Note that for demo purposes you don't need to register and can login with these credentials:</p>
+        <p>User: <b>demouser@microsoft.com</b> OR <b>admin@microsoft.com</b></p>
+        <p>Password: <b>Pass@word1</b></p>
+    </EditForm>
+</div>
+
+@code {
+    [SupplyParameterFromQuery] public string ReturnUrl { get; set; }
+
+    private readonly LoginModel model = new();
+    private string error;
+    private bool submitting;
+
+    private async Task Submit()
+    {
+        submitting = true;
+        error = await AccountService.LoginAsync(model.Email, model.Password);
+        submitting = false;
+
+        if (error == null)
+        {
+            Navigation.NavigateTo(SafeReturnUrl(ReturnUrl));
+        }
+    }
+
+    // Only allow local paths, so the login page can't be used as an open redirect.
+    internal static string SafeReturnUrl(string returnUrl) =>
+        !string.IsNullOrEmpty(returnUrl) && returnUrl.StartsWith("/") && !returnUrl.StartsWith("//") ? returnUrl : "/";
+
+    private class LoginModel
+    {
+        [Required, EmailAddress] public string Email { get; set; }
+        [Required] public string Password { get; set; }
+    }
+}

@@ -5,14 +5,14 @@
    "version": "0.2.0",
    "configurations": [
         {
-            "name": ".NET Core Launch (web)",
+            "name": ".NET Core Launch (PublicApi)",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/src/Web/bin/Debug/net8.0/Web.dll",
+            "program": "${workspaceFolder}/src/PublicApi/bin/Debug/net8.0/PublicApi.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/src/Web",
+            "cwd": "${workspaceFolder}/src/PublicApi",
             "stopAtEntry": false,
             // Enable launching a web browser when ASP.NET Core starts. For more information: https://aka.ms/VSCode-CS-LaunchJson-WebBrowser
             "serverReadyAction": {

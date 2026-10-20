@@ -1,4 +1,4 @@
-﻿namespace BlazorShared;
+namespace BlazorShared;
 
 public class BaseUrlConfiguration
 {
@@ -6,4 +6,5 @@ public class BaseUrlConfiguration
 
     public string ApiBase { get; set; }
     public string WebBase { get; set; }
+    public string AdminBase { get; set; }
 }

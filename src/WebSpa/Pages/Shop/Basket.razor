@@ -1,0 +1,88 @@
+@page "/basket"
+@implements IDisposable
+@inject BasketState BasketState
+
+<PageTitle>Basket - Microsoft.eShopOnWeb</PageTitle>
+
+<section class="esh-catalog-hero">
+    <div class="container">
+        <img class="esh-catalog-title" src="images/main_banner_text.png" />
+    </div>
+</section>
+
+<div class="container">
+    @if (BasketState.Basket.Items.Any())
+    {
+        <article class="esh-basket-titles row">
+            <section class="esh-basket-title col-3">Product</section>
+            <section class="esh-basket-title col-3"></section>
+            <section class="esh-basket-title col-2">Price</section>
+            <section class="esh-basket-title col-2">Quantity</section>
+            <section class="esh-basket-title col-2">Cost</section>
+        </article>
+        @foreach (var item in BasketState.Basket.Items)
+        {
+            <article class="esh-basket-items row">
+                <section class="esh-basket-item esh-basket-item--middle col-3">
+                    <img class="esh-basket-image" src="@item.PictureUrl" />
+                </section>
+                <section class="esh-basket-item esh-basket-item--middle col-3">@item.ProductName</section>
+                <section class="esh-basket-item esh-basket-item--middle col-2">$ @item.UnitPrice.ToString("N2")</section>
+                <section class="esh-basket-item esh-basket-item--middle col-2">
+                    <input type="number" class="esh-basket-input" min="0" @bind="quantities[item.Id.ToString()]" />
+                </section>
+                <section class="esh-basket-item esh-basket-item--middle esh-basket-item--mark col-2">$ @Math.Round(item.Quantity * item.UnitPrice, 2).ToString("N2")</section>
+            </article>
+        }
+
+        <article class="esh-basket-titles esh-basket-titles--clean row">
+            <section class="esh-basket-title col-10"></section>
+            <section class="esh-basket-title col-2">Total</section>
+        </article>
+        <article class="esh-basket-items row">
+            <section class="esh-basket-item col-10"></section>
+            <section class="esh-basket-item esh-basket-item--mark col-2">$ @BasketState.Basket.Total.ToString("N2")</section>
+        </article>
+
+        <div class="row">
+            <section class="esh-basket-item col-6">
+                <a href="" class="btn esh-basket-checkout text-white">[ Continue Shopping ]</a>
+            </section>
+            <section class="esh-basket-item col-6 text-right">
+                <button class="btn esh-basket-checkout" @onclick="Update">[ Update ]</button>
+                <a href="basket/checkout" class="btn esh-basket-checkout">[ Checkout ]</a>
+            </section>
+        </div>
+    }
+    else
+    {
+        <h3 class="esh-catalog-items row">Basket is empty.</h3>
+        <section class="esh-basket-item">
+            <a href="" class="btn esh-basket-checkout text-white">[ Continue Shopping ]</a>
+        </section>
+    }
+</div>
+
+@code {
+    private Dictionary<string, int> quantities = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        BasketState.OnChange += SyncQuantities;
+        SyncQuantities();
+        await BasketState.RefreshAsync();
+    }
+
+    private async Task Update()
+    {
+        await BasketState.UpdateQuantitiesAsync(quantities);
+    }
+
+    private void SyncQuantities()
+    {
+        quantities = BasketState.Basket.Items.ToDictionary(i => i.Id.ToString(), i => i.Quantity);
+        StateHasChanged();
+    }
+
+    public void Dispose() => BasketState.OnChange -= SyncQuantities;
+}

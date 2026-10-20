@@ -14,6 +14,7 @@ using Microsoft.eShopWeb.Infrastructure.Identity;
 using Microsoft.eShopWeb.Infrastructure.Logging;
 using Microsoft.eShopWeb.PublicApi;
 using Microsoft.eShopWeb.PublicApi.Middleware;
+using Microsoft.eShopWeb.PublicApi.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -44,6 +45,9 @@ var catalogSettings = builder.Configuration.Get<CatalogSettings>() ?? new Catalo
 builder.Services.AddSingleton<IUriComposer>(new UriComposer(catalogSettings));
 builder.Services.AddScoped(typeof(IAppLogger<>), typeof(LoggerAdapter<>));
 builder.Services.AddScoped<ITokenClaimsService, IdentityTokenClaimService>();
+builder.Services.AddScoped<IBasketService, BasketService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<BasketApiService>();
 
 var configSection = builder.Configuration.GetRequiredSection(BaseUrlConfiguration.CONFIG_NAME);
 builder.Services.Configure<BaseUrlConfiguration>(configSection);
@@ -75,7 +79,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: CORS_POLICY,
         corsPolicyBuilder =>
         {
-            corsPolicyBuilder.WithOrigins(baseUrlConfig!.WebBase.Replace("host.docker.internal", "localhost").TrimEnd('/'));
+            // Two headless clients call the API: the shop (WebSpa) and BlazorAdmin.
+            corsPolicyBuilder.WithOrigins(
+                baseUrlConfig!.WebBase.Replace("host.docker.internal", "localhost").TrimEnd('/'),
+                baseUrlConfig.AdminBase.Replace("host.docker.internal", "localhost").TrimEnd('/'));
             corsPolicyBuilder.AllowAnyMethod();
             corsPolicyBuilder.AllowAnyHeader();
         });

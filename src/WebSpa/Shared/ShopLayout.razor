@@ -1,0 +1,33 @@
+@inherits LayoutComponentBase
+
+@* Replaces Web's Views/Shared/_Layout.cshtml + _LoginPartial.cshtml + Basket view component *@
+<div class="esh-app-wrapper">
+    <header class="esh-app-header">
+        <div class="container">
+            <article class="row">
+                <section class="col-lg-7 col-md-6 col-12">
+                    <a href="">
+                        <img src="images/brand.png" alt="eShop On Web" />
+                    </a>
+                </section>
+                <section class="col-lg-4 col-md-5 col-12">
+                    <LoginDisplay />
+                </section>
+                <section class="col-lg-1 col-12">
+                    <BasketStatus />
+                </section>
+            </article>
+        </div>
+    </header>
+    @Body
+    <footer class="esh-app-footer footer">
+        <div class="container">
+            <article class="row">
+                <section class="col-sm-6"></section>
+                <section class="col-sm-6">
+                    <div class="esh-app-footer-text"> e-ShopOnWeb. All rights reserved </div>
+                </section>
+            </article>
+        </div>
+    </footer>
+</div>
