@@ -7,11 +7,16 @@ Der er **ingen microservices endnu**. Domænet, databasen og al logik er den sam
 ## Arkitektur
 
 ```
-FØR                                         EFTER
-Browser ──► Web (Razor Pages, SSR)          Browser ──► WebSpa (Blazor WASM, shop) ──┐
-            ├─ UI + login (cookie)          Browser ──► BlazorAdmin (Blazor WASM) ───┤ HTTP + JWT
-            ├─ ApplicationCore              │                                         ▼
-            └─ hoster BlazorAdmin ──► PublicApi                       PublicApi ── ApplicationCore ── Infrastructure ── DB
+FØR
+  Browser ──► Web (SSR) ────────────────────────────────┐
+               │ hoster                    in-process   ▼
+               └─► BlazorAdmin ──► PublicApi ──► ApplicationCore + Infrastructure ──► DB
+
+EFTER
+  Browser ──► WebSpa ──────┐
+                           ├──► PublicApi ──► ApplicationCore + Infrastructure ──► DB
+  Browser ──► BlazorAdmin ─┘   HTTP + JWT
+                                └────────────────── monolit ─────────────────┘
 ```
 
 ## Ændringer
@@ -54,9 +59,4 @@ Demo-brugere: `demouser@microsoft.com` / `admin@microsoft.com`, password `Pass@w
 
 Tests: `dotnet test eShopOnWeb.sln`. Kræver .NET 8 runtime, fordi API-testene fejler, hvis de rulles frem til .NET 9/10.
 
-## Videre: Strangler Pattern
 
-1. Sæt en API-gateway (f.eks. YARP) foran `PublicApi`, og lad `apiBase` i begge klienter pege på gatewayen.
-2. Træk ét bounded context ud ad gangen, f.eks. Catalog som `Catalog.API`, og flyt dets rute (`/api/catalog-*`) i gatewayen. Klienterne skal ikke ændres.
-3. Synkronisér data, som monolitten stadig bruger (Basket og Order læser katalogdata), via events, f.eks. RabbitMQ.
-4. Gentag for Basket og derefter Ordering, indtil `PublicApi` er tom og kan fjernes.
