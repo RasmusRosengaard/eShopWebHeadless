@@ -59,4 +59,108 @@ Demo-brugere: `demouser@microsoft.com` / `admin@microsoft.com`, password `Pass@w
 
 Tests: `dotnet test eShopOnWeb.sln`. Kræver .NET 8 runtime, fordi API-testene fejler, hvis de rulles frem til .NET 9/10.
 
+## Hvad er et færdigt produkt?
 
+Spørgsmål/krav taget udfra: https://drive.google.com/file/d/18PVhcuDnv0K4dXrhbqM-yhhQRgGZaDMz/view?usp=sharing
+
+<table>
+<tr>
+<th>Krav</th>
+<th>Hvordan kan vi se, om dette er opfyldt?</th>
+<th>Hvor i koden?</th>
+</tr>
+
+<!-- ============================================================ -->
+<tr>
+<td>Identificér og afgræns services (min. 3 microservices, fx katalog, ordre, betaling)</td>
+<td>
+
+Min 3 grænser, dog holder jeg mig til 1-2 microservices grundet teamets størrelse
+
+Henholdvis Catalog, Ordering, Inventory - her anvendt DDD i form af bounded contexts, som afgrænser hver service til et forretningsområde. De vurderes efterfølgende med cohesion og coupling.
+
+</td>
+<td>
+
+For at tjekke kig i `services/CatalogMicroservice` samt `services/InventoryMicroservice`
+
+</td>
+</tr>
+
+<!-- ============================================================ -->
+<tr>
+<td>Strangler Pattern implementering — funktionalitet flyttes gradvist uden driftsafbrydelse</td>
+<td>
+
+</td>
+<td>
+
+</td>
+</tr>
+
+<!-- ============================================================ -->
+<tr>
+<td>Lagerstyringssystem implementeret som selvstændig microservice</td>
+<td>
+
+</td>
+<td>
+
+</td>
+</tr>
+
+<!-- ============================================================ -->
+<tr>
+<td>API Gateway — samlet indgangspunkt med autentificering, load balancing og rate-limiting</td>
+<td>
+
+</td>
+<td>
+
+</td>
+</tr>
+
+<!-- ============================================================ -->
+<tr>
+<td>Asynkron beskedbaseret kommunikation mellem microservices (fx RabbitMQ, Azure Service Bus, Kafka)</td>
+<td>
+
+</td>
+<td>
+
+</td>
+</tr>
+
+<!-- ============================================================ -->
+<tr>
+<td>Fejlhåndtering og overvågning (fx Circuit Breaker, logging, ELK eller Prometheus/Grafana)</td>
+<td>
+
+</td>
+<td>
+
+</td>
+</tr>
+
+<!-- ============================================================ -->
+<tr>
+<td>CI/CD pipeline — automatisk build, test og deployment, containerisering (fx Docker)</td>
+<td>
+
+</td>
+<td>
+
+</td>
+</tr>
+
+<!-- ============================================================ -->
+<tr>
+<td>Dokumentation af arkitekturbeslutninger, API'er og microservices (fx i README)</td>
+<td>
+
+</td>
+<td>
+
+</td>
+</tr>
+</table>
