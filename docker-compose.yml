@@ -8,6 +8,7 @@ services:
       dockerfile: src/WebSpa/Dockerfile
     depends_on:
       - "eshoppublicapi"
+      - "reverseproxy"
   eshopblazoradmin:
     image: ${DOCKER_REGISTRY-}eshopblazoradmin
     build:
@@ -15,6 +16,7 @@ services:
       dockerfile: src/BlazorAdmin/Dockerfile
     depends_on:
       - "eshoppublicapi"
+      - "reverseproxy"
   eshoppublicapi:
     image: ${DOCKER_REGISTRY-}eshoppublicapi
     build:
@@ -29,3 +31,10 @@ services:
     environment:
       - SA_PASSWORD=@someThingComplicated1234
       - ACCEPT_EULA=Y
+  reverseproxy:
+    image: ${DOCKER_REGISTRY-}reverseproxy
+    build:
+      context: ./services/ReverseProxy
+      dockerfile: Dockerfile
+    depends_on:
+      - "eshoppublicapi"
