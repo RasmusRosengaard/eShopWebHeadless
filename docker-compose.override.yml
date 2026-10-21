@@ -15,3 +15,8 @@ services:
    volumes:
      - ~/.aspnet/https:/root/.aspnet/https:ro
      - ~/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
+ reverseproxy:
+   environment:
+     - ASPNETCORE_ENVIRONMENT=Docker
+   ports:
+     - "5300:8080"
