@@ -104,6 +104,17 @@ For at tjekke kig i `services/CatalogMicroservice` samt `services/InventoryMicro
 </tr>
 </table>
 
+## CI/CD microservices
+
+Idé: **ét workflow pr. deploybar enhed**. Hvert workflow trigges kun af ændringer i sin egen mappe, så en service kan bygges, testes og deployes uafhængigt af de andre. Selve pipelinen ligger ét sted (`_dotnet-service.yml`) og genbruges af alle services.
+
+| Workflow | Deploybar enhed | Trigger | Funktion |
+|---|---|---|---|
+| `_dotnet-service.yml` | – (genbrugelig skabelon) | `workflow_call` | Fælles pipeline: build → unit tests → integrationstests → Docker-image → staging → production (manuel godkendelse). Discord-besked ved fejl. .NET-version læses fra servicens `global.json`. |
+| `reverseproxy.yml` | `services/ReverseProxy` | push til `main` / PR på `services/ReverseProxy/**` | Kalder `_dotnet-service.yml` med `service: ReverseProxy`. |
+| `monolit.yml` | `src/` (monolitten) | push / PR på `src/**`, `tests/**` | Midlertidig: bygger og tester monolitten, indtil den er udskilt i services. |
+
+Ny service: opret `services/<Service>/` med samme struktur og et lille `<service>.yml`, der kalder `_dotnet-service.yml`.
 
 
 
@@ -165,3 +176,4 @@ dotnet run --project src/BlazorAdmin
 Docker: `docker compose up --build` starter shop på http://localhost:5106, admin på http://localhost:5107 og API på http://localhost:5200.
 
 Demo-brugere: `demouser@microsoft.com` / `admin@microsoft.com`, password `Pass@word1`.
+
