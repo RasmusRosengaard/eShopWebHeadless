@@ -4,7 +4,11 @@ on:
   push:
     branches: [main]
     paths:
-      - 'services/reverseproxy/**'
+      - 'services/ReverseProxy/**'
+      - '.github/workflows/reverseproxy.yml'
+  pull_request:
+    paths:
+      - 'services/ReverseProxy/**'
       - '.github/workflows/reverseproxy.yml'
 jobs:
   pipeline:
