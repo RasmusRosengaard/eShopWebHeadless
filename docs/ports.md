@@ -12,6 +12,7 @@ Kilde: `Properties/launchSettings.json` i hvert projekt.
 | PublicApi | `https://localhost:5099` | `http://localhost:5098` | Swagger: `/swagger` |
 | WebSpa | `https://localhost:5001` | `http://localhost:5000` | |
 | BlazorAdmin | `https://localhost:5003` | `http://localhost:5002` | |
+| CatalogService | `https://localhost:7017` | `http://localhost:5048` | Standard er http-profilen |
 
 ## Docker (`docker compose up`)
 
@@ -21,6 +22,7 @@ Kilde: `docker-compose.yml` og `docker-compose.override.yml`.
 |---|---|---|---|
 | ReverseProxy (gateway) | `reverseproxy` | `5300 → 8080` | `http://localhost:5300` |
 | PublicApi | `eshoppublicapi` | `5200 → 8080` | `http://localhost:5200` |
+| CatalogService | `catalogservice` | `5400 → 8080` | `http://localhost:5400` |
 | WebSpa | `eshopwebspa` | `5106 → 80` | `http://localhost:5106` |
 | BlazorAdmin | `eshopblazoradmin` | `5107 → 80` | `http://localhost:5107` |
 | SQL Server | `sqlserver` | `1433 → 1433` | `localhost,1433` |
@@ -34,12 +36,17 @@ Browser (WebSpa / BlazorAdmin)
         │  apiBase
         ▼
 ReverseProxy (YARP)   lokalt :5050   ·  docker :5300
-        │  catch-all route → legacy-cluster
-        ▼
-PublicApi             lokalt :5099   ·  docker eshoppublicapi:8080
-        │
-        ▼
-SQL Server            docker sqlserver:1433
+        │                                    │
+        │  catch-all → legacy-cluster        │  catalog-routes → catalog-cluster (kommer i fase 2.2)
+        ▼                                    ▼
+PublicApi                                 CatalogService
+lokalt :5099                              lokalt :5048
+docker eshoppublicapi:8080                docker catalogservice:8080
+        │                                    │
+        └──────────────┬─────────────────────┘
+                       ▼
+               SQL Server (delt database)
+               docker sqlserver:1433
 ```
 
 ## Hvor portene er konfigureret
@@ -51,10 +58,13 @@ SQL Server            docker sqlserver:1433
 | Gateway → PublicApi, lokalt | `services/ReverseProxy/ReverseProxy.Api/appsettings.Development.json` | `https://localhost:5099/` |
 | Gateway → PublicApi, Docker | `services/ReverseProxy/ReverseProxy.Api/appsettings.Docker.json` | `http://eshoppublicapi:8080/` |
 | PublicApi CORS (tilladte klienter) | `src/PublicApi/appsettings*.json` | `webBase`, `adminBase` |
+| CatalogService CORS (tilladte klienter) | `services/CatalogService/CatalogService.Api/appsettings(.Docker).json` | `webBase`, `adminBase` |
+| CatalogService billed-URL'er | `services/CatalogService/CatalogService.Api/appsettings(.Docker).json` | `CatalogBaseUrl` → `https://localhost:5001` / `http://localhost:5106` |
+| CatalogService → database | `services/CatalogService/CatalogService.Api/appsettings.Development.json` / `appsettings.Docker.json` | LocalDB / `sqlserver,1433` |
 
 ## Health check
 
-| Miljø | URL |
-|---|---|
-| Lokalt | `http://localhost:5050/health` |
-| Docker | `http://localhost:5300/health` |
+| Service | Lokalt | Docker |
+|---|---|---|
+| ReverseProxy (gateway) | `http://localhost:5050/health` | `http://localhost:5300/health` |
+| CatalogService | `http://localhost:5048/health` | `http://localhost:5400/health` |

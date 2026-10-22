@@ -38,3 +38,11 @@ services:
       dockerfile: services/ReverseProxy/ReverseProxy.Api/Dockerfile
     depends_on:
       - "eshoppublicapi"
+      - "catalogservice"
+  catalogservice:
+    image: ${DOCKER_REGISTRY-}catalogservice
+    build:
+      context: .
+      dockerfile: services/CatalogService/CatalogService.Api/Dockerfile
+    depends_on:
+      - "sqlserver"

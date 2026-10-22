@@ -20,3 +20,8 @@ services:
      - ASPNETCORE_ENVIRONMENT=Docker
    ports:
      - "5300:8080"
+ catalogservice:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+    ports:
+      - "5400:8080"
