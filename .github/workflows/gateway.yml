@@ -1,0 +1,16 @@
+name: Gateway
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'services/Gateway/**'
+      - '.github/workflows/gateway.yml'
+jobs:
+  pipeline:
+    uses: ./.github/workflows/_dotnet-service.yml
+    with:
+      service: Gateway
+      image: gateway # det navn som imaget får bagefter build
+    secrets:
+      DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}

@@ -1,0 +1,34 @@
+name: eShopOnWeb Build and Test
+# ci/cd som tester og bygger den orginale monolit, som den er nu. 
+# Dette workflow er kun midlertidigt, indtil vi har udtrukket de forskellige microservices.
+# disse paths skal specififers senere, når jeg udtrækker monolitten til microservices, "ideelt" kan dette helt erstattes af forskellige service.yml workflow.
+on:
+  push:
+    paths: 
+      - 'src/**'
+      - 'tests/**'
+      - 'Directory.Packages.props'
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'tests/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '8.0.x'
+        include-prerelease: true
+
+    - name: Build with dotnet
+      run: dotnet build ./eShopOnWeb.sln --configuration Release
+    
+    - name: Test with dotnet
+      run: dotnet test ./eShopOnWeb.sln --configuration Release
