@@ -48,8 +48,8 @@ SQL Server            docker sqlserver:1433
 |---|---|---|
 | Klienternes API-adresse, lokalt | `src/WebSpa/wwwroot/appsettings(.Development).json`, `src/BlazorAdmin/wwwroot/appsettings(.Development).json` | `apiBase` → `http://localhost:5050/api/` |
 | Klienternes API-adresse, Docker | `src/WebSpa/wwwroot/appsettings.Docker.json`, `src/BlazorAdmin/wwwroot/appsettings.Docker.json` | `apiBase` → `http://localhost:5300/api/` |
-| Gateway → PublicApi, lokalt | `services/ReverseProxy/appsettings.Development.json` | `https://localhost:5099/` |
-| Gateway → PublicApi, Docker | `services/ReverseProxy/appsettings.Docker.json` | `http://eshoppublicapi:8080/` |
+| Gateway → PublicApi, lokalt | `services/ReverseProxy/ReverseProxy.Api/appsettings.Development.json` | `https://localhost:5099/` |
+| Gateway → PublicApi, Docker | `services/ReverseProxy/ReverseProxy.Api/appsettings.Docker.json` | `http://eshoppublicapi:8080/` |
 | PublicApi CORS (tilladte klienter) | `src/PublicApi/appsettings*.json` | `webBase`, `adminBase` |
 
 ## Health check

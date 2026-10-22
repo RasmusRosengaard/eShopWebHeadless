@@ -1,0 +1,15 @@
+name: Catalog Service
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'services/CatalogService/**'
+jobs: 
+  pipeline:
+    uses: ./.github/workflows/_dotnet-service.yml
+    with:
+      service: CatalogService
+      image: catalogservice # det navn som imaget får bagefter build
+    secrets:
+      DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}

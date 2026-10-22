@@ -1,0 +1,20 @@
+name: ReverseProxy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'services/ReverseProxy/**'
+      - '.github/workflows/reverseproxy.yml'
+  pull_request:
+    paths:
+      - 'services/ReverseProxy/**'
+      - '.github/workflows/reverseproxy.yml'
+jobs:
+  pipeline:
+    uses: ./.github/workflows/_dotnet-service.yml
+    with:
+      service: ReverseProxy
+      image: reverseproxy # det navn som imaget får bagefter build
+    secrets:
+      DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}

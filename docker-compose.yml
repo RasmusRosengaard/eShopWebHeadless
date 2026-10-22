@@ -34,7 +34,7 @@ services:
   reverseproxy:
     image: ${DOCKER_REGISTRY-}reverseproxy
     build:
-      context: ./services/ReverseProxy
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/ReverseProxy/ReverseProxy.Api/Dockerfile
     depends_on:
       - "eshoppublicapi"

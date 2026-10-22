@@ -1,0 +1,124 @@
+name: .NET Service Pipeline
+
+# Genbrugelig pipeline for én microservice.
+# Forventet struktur:
+#   services/<service>/<service>.sln
+#   services/<service>/<service>.Api/Dockerfile
+#   services/<service>/tests/<service>.UnitTests/
+#   services/<service>/tests/<service>.IntegrationTests/
+
+on:
+  workflow_call:
+    inputs:
+      service:
+        type: string
+        required: true  # vi skal have et service-navn fra kalderen
+      image:
+        type: string
+        required: true  # vi skal have et image-navn fra kalderen
+    secrets:
+      DISCORD_WEBHOOK:
+        required: false # sættes som repository secret; uden den springes notifikationen over
+
+jobs:
+  # build stage
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - run: dotnet build ./services/${{ inputs.service }}/${{ inputs.service }}.sln -c Release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ inputs.service }}
+          path: |
+            services/${{ inputs.service }}/**/bin/Release/
+            services/${{ inputs.service }}/**/obj/
+          retention-days: 1
+  # fast tests stage
+  fast-tests:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - uses: actions/download-artifact@v4
+        with:
+          name: build-${{ inputs.service }}
+          path: services/${{ inputs.service }}
+
+      - run: >
+          dotnet test ./services/${{ inputs.service }}/tests/${{ inputs.service }}.UnitTests
+          -c Release --no-build
+  # slow tests stage
+  slow-tests:
+    needs: fast-tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - uses: actions/download-artifact@v4
+        with:
+          name: build-${{ inputs.service }}
+          path: services/${{ inputs.service }}
+
+      - run: >
+          dotnet test ./services/${{ inputs.service }}/tests/${{ inputs.service }}.IntegrationTests
+          -c Release --no-build
+  # artifact creation stage 
+  package:
+    needs: slow-tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./services/${{ inputs.service }}/${{ inputs.service }}.Api/Dockerfile
+          push: false
+          tags: ${{ inputs.image }}:${{ github.sha }}
+
+  # Environment Deployment: staging og production 
+  deploy-staging:
+    needs: package
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - run: echo "Deploy ${{ inputs.image }}:${{ github.sha }} til staging"
+
+  deploy-production:
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    environment: production     # krav: Implementer manual approval for production deploys
+    steps:
+      - run: echo "Deploy ${{ inputs.image }}:${{ github.sha }} til production"
+
+  # failure discord notification: kører KUN hvis et af ovenstående jobs fejlede
+  notify-failure:
+    needs: [build, fast-tests, slow-tests, package, deploy-staging, deploy-production]
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send besked til Discord
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          if [ -z "$WEBHOOK" ]; then
+            echo "DISCORD_WEBHOOK er ikke sat - springer notifikation over"
+            exit 0
+          fi
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          curl -sS -H "Content-Type: application/json" -X POST "$WEBHOOK" -d @- <<JSON
+          {
+            "content": "**Pipeline fejlede: ${{ inputs.service }}**\nCommit: \`${{ github.sha }}\`\n$RUN_URL"
+          }
+          JSON
