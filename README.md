@@ -85,10 +85,11 @@ For at tjekke kig i `services/CatalogMicroservice` samt `services/InventoryMicro
 <tr>
 <td>CI/CD pipeline — automatisk build, test og deployment, containerisering (fx Docker)</td>
 <td>
-
+Hver service har sin egen service.yml, som kun bliver triggeret af ændringer i sin egen mappe, så en service kan bygges, testes og deployes uafhængigt af de andre. 
 </td>
 <td>
-
+Selve pipelinen ligger ét sted .github/workflows/_dotnet-service.yml.
+I samme  mappe ligger alle service.yml filerne, for mere information se skemaet i afsnit "CI/CD microservices".
 </td>
 </tr>
 
