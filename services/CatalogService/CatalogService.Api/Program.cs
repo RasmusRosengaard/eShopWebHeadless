@@ -5,6 +5,10 @@ using CatalogService.Api.Services;
 using Microsoft.EntityFrameworkCore;
 using MinimalApi.Endpoint.Configurations.Extensions;
 using MinimalApi.Endpoint.Extensions;
+using System.Text;
+using CatalogService.Api.Middleware;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,12 +43,34 @@ builder.Services.AddCors(options =>
 });
 builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
+var jwtKey = Encoding.ASCII.GetBytes(builder.Configuration["JwtSecretKey"]!);
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(config =>
+    {
+        config.RequireHttpsMetadata = false;
+        config.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(jwtKey),
+            ValidateIssuer = false,
+            ValidateAudience = false
+        };
+    });
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
+app.UseMiddleware<ExceptionMiddleware>();
+
 app.UseCors(CORS_POLICY);
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapHealthChecks("/health");
 
 app.MapEndpoints();
 
 app.Run();
+
+public partial class Program { }
