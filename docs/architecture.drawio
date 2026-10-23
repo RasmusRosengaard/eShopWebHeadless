@@ -1,0 +1,96 @@
+<mxfile host="65bd71144e">
+    <diagram name="Arkitektur" id="Zqayjgb21xDXVDbB72KI">
+        <mxGraphModel dx="930" dy="1109" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="title" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=22;fontColor=#333333;" value="&lt;b&gt;Strangler Pattern&lt;/b&gt; · Catalog udskilles fra monolitten" vertex="1">
+                    <mxGeometry height="40" width="900" x="40" y="-40" as="geometry"/>
+                </mxCell>
+                <mxCell id="clients" parent="1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#6c8ebf;verticalAlign=top;fontColor=#6c8ebf;fontStyle=1;spacingTop=4;" value="Klienter (Blazor WASM)" vertex="1">
+                    <mxGeometry height="230" width="220" x="30" y="190" as="geometry"/>
+                </mxCell>
+                <mxCell id="webspa" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;spacingLeft=10;" value="&lt;b&gt;WebSpa&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;shop&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="60" width="190" x="45" y="230" as="geometry"/>
+                </mxCell>
+                <mxCell id="admin" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;spacingLeft=10;" value="&lt;b&gt;BlazorAdmin&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;admin&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="60" width="190" x="45" y="330" as="geometry"/>
+                </mxCell>
+                <mxCell id="gateway" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=13;align=left;spacingLeft=10;" value="&lt;b&gt;API Gateway&lt;/b&gt;&lt;br&gt;YARP&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;GET /health&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="120" width="200" x="300" y="250" as="geometry"/>
+                </mxCell>
+                <mxCell id="catalog" parent="1" style="rounded=1;arcSize=4;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;verticalAlign=top;fontStyle=1;fontSize=14;spacingTop=6;align=left;spacingLeft=12;" value="CatalogService (.NET 10)" vertex="1">
+                    <mxGeometry height="200" width="340" x="620" y="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="catalog-endpoints" parent="1" style="text;html=1;align=left;verticalAlign=top;fontFamily=Courier New;fontSize=12;spacingLeft=6;" value="GET&amp;nbsp;&amp;nbsp;&amp;nbsp; /api/catalog-items&lt;br&gt;GET&amp;nbsp;&amp;nbsp;&amp;nbsp; /api/catalog-items/{id}&lt;br&gt;POST&amp;nbsp;&amp;nbsp; /api/catalog-items&lt;br&gt;PUT&amp;nbsp;&amp;nbsp;&amp;nbsp; /api/catalog-items&lt;br&gt;DELETE /api/catalog-items/{id}&lt;br&gt;GET&amp;nbsp;&amp;nbsp;&amp;nbsp; /api/catalog-brands&lt;br&gt;GET&amp;nbsp;&amp;nbsp;&amp;nbsp; /api/catalog-types&lt;br&gt;GET&amp;nbsp;&amp;nbsp;&amp;nbsp; /health" vertex="1">
+                    <mxGeometry height="150" width="235" x="630" y="72" as="geometry"/>
+                </mxCell>
+                <mxCell id="catalog-db" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#ffffff;strokeColor=#82b366;fontSize=11;" value="CatalogDB" vertex="1">
+                    <mxGeometry height="80" width="75" x="870" y="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="monolith" parent="1" style="rounded=1;arcSize=4;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;verticalAlign=top;fontStyle=1;fontSize=14;spacingTop=6;align=left;spacingLeft=12;" value="Monolit · PublicApi (.NET 8)" vertex="1">
+                    <mxGeometry height="320" width="340" x="620" y="330" as="geometry"/>
+                </mxCell>
+                <mxCell id="monolith-endpoints" parent="1" style="text;html=1;align=left;verticalAlign=top;fontFamily=Courier New;fontSize=12;spacingLeft=6;" value="/api/basket …&lt;br&gt;/api/orders …&lt;br&gt;/api/authenticate&lt;br&gt;/api/register" vertex="1">
+                    <mxGeometry height="110" width="240" x="630" y="370" as="geometry"/>
+                </mxCell>
+                <mxCell id="shared-db" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#ffffff;strokeColor=#d6b656;fontSize=11;" value="eShop DB&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;SQL Server&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="90" width="75" x="870" y="390" as="geometry"/>
+                </mxCell>
+                <mxCell id="sync" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;fontSize=12;" value="&lt;b&gt;CatalogSyncConsumer&lt;/b&gt;" vertex="1">
+                    <mxGeometry height="60" width="170" x="640" y="560" as="geometry"/>
+                </mxCell>
+                <mxCell id="bus" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#f8cecc;strokeColor=#b85450;fontSize=13;" value="&lt;b&gt;RabbitMQ&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;topic exchange&lt;br&gt;&quot;catalog&quot;&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="610" width="110" x="1050" y="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-webspa" edge="1" parent="1" source="webspa" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#6c8ebf;strokeWidth=2;" target="gateway">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-admin" edge="1" parent="1" source="admin" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#6c8ebf;strokeWidth=2;" target="gateway">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-gw-catalog" edge="1" parent="1" source="gateway" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#82b366;strokeWidth=2;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=11;fontFamily=Courier New;labelBackgroundColor=#ffffff;" target="catalog" value="/api/catalog-*">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-gw-monolith" edge="1" parent="1" source="gateway" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#d6b656;strokeWidth=2;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=11;labelBackgroundColor=#ffffff;" target="monolith" value="alt andet (catch-all)">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-catalog-db" edge="1" parent="1" source="catalog-endpoints" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#82b366;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" target="catalog-db">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-monolith-db" edge="1" parent="1" source="monolith-endpoints" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#d6b656;strokeWidth=2;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" target="shared-db">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-publish" edge="1" parent="1" source="catalog" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#b85450;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0;entryDx=0;entryDy=100;entryPerimeter=0;fontSize=10;fontFamily=Courier New;labelBackgroundColor=#ffffff;align=left;" target="bus" value="publish&lt;br&gt;catalog.item.created&lt;br&gt;catalog.item.updated&lt;br&gt;catalog.item.deleted">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-subscribe" edge="1" parent="1" source="bus" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#b85450;strokeWidth=2;exitX=0;exitY=0;exitDx=0;exitDy=550;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontSize=10;fontFamily=Courier New;labelBackgroundColor=#ffffff;" target="sync" value="catalog.item.*">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-upsert" edge="1" parent="1" source="sync" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#d6b656;strokeWidth=2;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;fontSize=10;labelBackgroundColor=#fff2cc;" target="shared-db" value="upsert&lt;br&gt;read-only kopi">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="725" y="520"/>
+                            <mxPoint x="908" y="520"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="ports-webspa" parent="1" style="text;html=1;align=right;verticalAlign=top;fontFamily=Courier New;fontSize=10;fontColor=#555555;spacingRight=6;" value="local&amp;nbsp; :5001&lt;br&gt;docker :5106" vertex="1">
+                    <mxGeometry height="32" width="110" x="125" y="232" as="geometry"/>
+                </mxCell>
+                <mxCell id="ports-admin" parent="1" style="text;html=1;align=right;verticalAlign=top;fontFamily=Courier New;fontSize=10;fontColor=#555555;spacingRight=6;" value="local&amp;nbsp; :5003&lt;br&gt;docker :5107" vertex="1">
+                    <mxGeometry height="32" width="110" x="125" y="332" as="geometry"/>
+                </mxCell>
+                <mxCell id="ports-gateway" parent="1" style="text;html=1;align=right;verticalAlign=top;fontFamily=Courier New;fontSize=10;fontColor=#555555;spacingRight=6;" value="local&amp;nbsp; :5050&lt;br&gt;docker :5300" vertex="1">
+                    <mxGeometry height="32" width="110" x="390" y="252" as="geometry"/>
+                </mxCell>
+                <mxCell id="ports-catalog" parent="1" style="text;html=1;align=right;verticalAlign=top;fontFamily=Courier New;fontSize=10;fontColor=#555555;spacingRight=6;" value="local&amp;nbsp; :5048&lt;br&gt;docker :5400" vertex="1">
+                    <mxGeometry height="32" width="110" x="850" y="44" as="geometry"/>
+                </mxCell>
+                <mxCell id="ports-monolith" parent="1" style="text;html=1;align=right;verticalAlign=top;fontFamily=Courier New;fontSize=10;fontColor=#555555;spacingRight=6;" value="local&amp;nbsp; :5099&lt;br&gt;docker :5200" vertex="1">
+                    <mxGeometry height="32" width="110" x="850" y="334" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
