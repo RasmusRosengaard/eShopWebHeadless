@@ -25,7 +25,8 @@ Kilde: `docker-compose.yml` og `docker-compose.override.yml`.
 | CatalogService | `catalogservice` | `5400 → 8080` | `http://localhost:5400` |
 | WebSpa | `eshopwebspa` | `5106 → 80` | `http://localhost:5106` |
 | BlazorAdmin | `eshopblazoradmin` | `5107 → 80` | `http://localhost:5107` |
-| SQL Server | `sqlserver` | `1433 → 1433` | `localhost,1433` |
+| SQL Server (monolit) | `sqlserver` | `1433 → 1433` | `localhost,1433` |
+| PostgreSQL (CatalogService) | `catalogdb` | `5433 → 5432` | `localhost:5433` |
 
 ### Værtsport vs. containerport
 
@@ -49,18 +50,18 @@ Browser (WebSpa / BlazorAdmin)
         ▼
 ReverseProxy (YARP)   lokalt :5050   ·  docker :5300
         │                                    │
-        │  catch-all → legacy-cluster        │  GET /api/catalog-items/**
-        │  (alt andet, inkl. catalog-        │  GET /api/catalog-brands
-        │   POST/PUT/DELETE og OPTIONS)      │  GET /api/catalog-types
+        │  catch-all → legacy-cluster        │  GET/POST/PUT/DELETE /api/catalog-items/**
+        │  (alt andet, inkl. OPTIONS)        │  GET /api/catalog-brands
+        │                                    │  GET /api/catalog-types
         ▼                                    ▼  → catalog-cluster
 PublicApi                                 CatalogService
 lokalt :5099                              lokalt :5048
 docker eshoppublicapi:8080                docker catalogservice:8080
         │                                    │
-        └──────────────┬─────────────────────┘
-                       ▼
-               SQL Server (delt database)
-               docker sqlserver:1433
+        ▼                                    ▼
+SQL Server                                PostgreSQL (egen database)
+docker sqlserver:1433                     lokalt localhost:5433
+                                          docker catalogdb:5432
 ```
 
 ## Hvor portene er konfigureret
@@ -73,11 +74,12 @@ docker eshoppublicapi:8080                docker catalogservice:8080
 | Gateway → PublicApi, Docker | `services/ReverseProxy/ReverseProxy.Api/appsettings.Docker.json` | `http://eshoppublicapi:8080/` |
 | Gateway → CatalogService, lokalt | `services/ReverseProxy/ReverseProxy.Api/appsettings.Development.json` | `http://localhost:5048/` |
 | Gateway → CatalogService, Docker | `services/ReverseProxy/ReverseProxy.Api/appsettings.Docker.json` | `http://catalogservice:8080/` |
-| Gateway routes (hvad går hvorhen) | `services/ReverseProxy/ReverseProxy.Api/appsettings.json` | `legacy-route`, `catalog-*-read` |
+| Gateway routes (hvad går hvorhen) | `services/ReverseProxy/ReverseProxy.Api/appsettings.json` | `legacy-route`, `catalog-*-read`, `catalog-items-write` |
 | PublicApi CORS (tilladte klienter) | `src/PublicApi/appsettings*.json` | `webBase`, `adminBase` |
 | CatalogService CORS (tilladte klienter) | `services/CatalogService/CatalogService.Api/appsettings(.Docker).json` | `webBase`, `adminBase` |
 | CatalogService billed-URL'er | `services/CatalogService/CatalogService.Api/appsettings(.Docker).json` | `CatalogBaseUrl` → `https://localhost:5001` / `http://localhost:5106` |
-| CatalogService → database | `services/CatalogService/CatalogService.Api/appsettings.Development.json` / `appsettings.Docker.json` | LocalDB / `sqlserver,1433` |
+| CatalogService → database | `services/CatalogService/CatalogService.Api/appsettings.Development.json` / `appsettings.Docker.json` | `Host=localhost;Port=5433` / `Host=catalogdb;Port=5432` |
+| CatalogService-database (Postgres) | `docker-compose.yml` (`catalogdb`) | `5433 → 5432`, db `catalogdb`, bruger `catalog` |
 
 ## Health check
 

@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram name="Arkitektur" id="Zqayjgb21xDXVDbB72KI">
-        <mxGraphModel dx="660" dy="886" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+        <mxGraphModel dx="1249" dy="1189" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -83,6 +83,9 @@
                 </mxCell>
                 <mxCell id="ports-monolith" parent="1" style="text;html=1;align=right;verticalAlign=top;fontFamily=Courier New;fontSize=10;fontColor=#555555;spacingRight=6;" value="local&amp;nbsp; :5099&lt;br&gt;docker :5200" vertex="1">
                     <mxGeometry height="32" width="110" x="850" y="334" as="geometry"/>
+                </mxCell>
+                <mxCell id="mXEn7dnBQDZ0GqowVeNv-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="Skal denne kommunikation være messaging?" vertex="1">
+                    <mxGeometry height="60" width="120" x="460" y="117" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>

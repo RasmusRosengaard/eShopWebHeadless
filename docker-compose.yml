@@ -45,4 +45,17 @@ services:
       context: .
       dockerfile: services/CatalogService/CatalogService.Api/Dockerfile
     depends_on:
-      - "sqlserver"
+      - "catalogdb"
+    restart: on-failure
+  catalogdb:
+    image: postgres:17
+    environment:
+      - POSTGRES_USER=catalog
+      - POSTGRES_PASSWORD=catalogpassword
+      - POSTGRES_DB=catalogdb
+    ports:
+      - "5433:5432"
+
+    
+
+

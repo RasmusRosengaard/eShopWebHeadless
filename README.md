@@ -30,9 +30,10 @@ For at tjekke kig i `services/CatalogMicroservice` samt `services/InventoryMicro
 <tr>
 <td>Strangler Pattern implementering — funktionalitet flyttes gradvist uden driftsafbrydelse</td>
 <td>
-
+Jeg har gradvist udskillet services (CatalogService), hvor den først udskilles men stadig bruger monolittens database, og nu har sin egen database. Som gør at hvert commit, stadig har været fuldt funktionelt i produktion.
 </td>
 <td>
+For at tjekke kig i `services/CatalogService/*`
 
 </td>
 </tr>
