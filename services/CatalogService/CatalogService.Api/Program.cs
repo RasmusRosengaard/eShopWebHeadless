@@ -16,7 +16,7 @@ builder.Services.AddEndpoints();
 
 builder.Services.AddHealthChecks();
 builder.Services.AddDbContext<CatalogContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("CatalogConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("CatalogConnection")));
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
 builder.Services.AddScoped(typeof(IReadRepository<>), typeof(EfRepository<>));
@@ -59,6 +59,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<CatalogContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+    if (context.Database.IsNpgsql())
+    {
+        await context.Database.MigrateAsync();
+    }
+    await CatalogContextSeed.SeedAsync(context, logger);
+}
 
 app.UseMiddleware<ExceptionMiddleware>();
 
