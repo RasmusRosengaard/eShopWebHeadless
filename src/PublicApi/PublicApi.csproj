@@ -10,7 +10,6 @@
 
   <ItemGroup>
     <PackageReference Include="Ardalis.ApiEndpoints" />
-    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" />
     <PackageReference Include="MinimalApi.Endpoint" />
     <PackageReference Include="RabbitMQ.Client" />
     <PackageReference Include="Swashbuckle.AspNetCore" />
