@@ -33,5 +33,7 @@ consumer.ReceivedAsync += (_, message) =>
 // autoAck: beskeden fjernes fra køen, så snart den er leveret hertil.
 await channel.BasicConsumeAsync(QueueName, autoAck: true, consumer);
 
-Console.WriteLine($"Lytter på {QueueName}. Tryk Enter for at stoppe.");
-Console.ReadLine();
+Console.WriteLine($"Lytter på {QueueName}. Tryk Ctrl+C for at stoppe.");
+
+// Vent for evigt. Console.ReadLine virker ikke i Docker (intet tastatur), så appen ville lukke med det samme.
+await Task.Delay(Timeout.Infinite);

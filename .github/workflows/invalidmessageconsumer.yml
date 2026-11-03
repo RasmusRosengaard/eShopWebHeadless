@@ -1,0 +1,26 @@
+name: InvalidMessageConsumer
+
+# Simpelt workflow: konsol-appen har ingen tests, så "testen" er, at projektet og Docker-imaget bygger.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'services/InvalidMessageConsumer/**'
+      - '.github/workflows/invalidmessageconsumer.yml'
+  pull_request:
+    paths:
+      - 'services/InvalidMessageConsumer/**'
+      - '.github/workflows/invalidmessageconsumer.yml'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: services/InvalidMessageConsumer/global.json # samme .NET-version som lokalt
+
+      - run: dotnet build ./services/InvalidMessageConsumer/InvalidMessageConsumer.csproj -c Release
+
+      # Build context er repo-roden, ligesom i docker-compose.yml
+      - run: docker build -f services/InvalidMessageConsumer/Dockerfile -t invalidmessageconsumer .

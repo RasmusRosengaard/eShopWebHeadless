@@ -25,6 +25,9 @@ services:
       - ASPNETCORE_ENVIRONMENT=Docker
     ports:
       - "5400:8080"
+ invalidmessageconsumer:
+   environment:
+     - DOTNET_ENVIRONMENT=Docker
  rabbitmq:
    ports:
      - "5673:5672"

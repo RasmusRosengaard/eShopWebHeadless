@@ -57,6 +57,16 @@ services:
       rabbitmq:
         condition: service_healthy
     restart: on-failure
+  invalidmessageconsumer:
+    image: ${DOCKER_REGISTRY-}invalidmessageconsumer
+    build:
+      context: .
+      dockerfile: services/InvalidMessageConsumer/Dockerfile
+    # Monitor for Invalid Message Channel: printer ugyldige beskeder, se dem med docker compose logs -f invalidmessageconsumer
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: on-failure
   catalogdb:
     image: postgres:17
     # Navngivet volume i stedet for den anonyme, image'et selv laver, så data også overlever docker compose down.
