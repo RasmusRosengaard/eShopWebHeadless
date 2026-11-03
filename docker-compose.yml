@@ -23,9 +23,16 @@ services:
       context: .
       dockerfile: src/PublicApi/Dockerfile
     depends_on:
-      - "sqlserver"
+      sqlserver:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
   sqlserver:
     image: mcr.microsoft.com/azure-sql-edge
+    # Monolittens database. Uden volume ligger den inde i containeren og seedes forfra, når containeren
+    # genskabes, mens CatalogService beholder sine data, og så er kopierne ude af sync.
+    volumes:
+      - sqlserver-data:/var/opt/mssql
     ports:
       - "1433:1433"
     environment:
@@ -52,6 +59,9 @@ services:
     restart: on-failure
   catalogdb:
     image: postgres:17
+    # Navngivet volume i stedet for den anonyme, image'et selv laver, så data også overlever docker compose down.
+    volumes:
+      - catalogdb-data:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=catalog
       - POSTGRES_PASSWORD=catalogpassword
@@ -77,4 +87,6 @@ services:
 
 volumes:
   rabbitmq-data:
+  catalogdb-data:
+  sqlserver-data:
 

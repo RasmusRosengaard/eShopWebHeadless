@@ -26,22 +26,7 @@ var catalogSettings = builder.Configuration.Get<CatalogSettings>() ?? new Catalo
 builder.Services.AddSingleton<IUriComposer>(new UriComposer(catalogSettings));
 var configSection = builder.Configuration.GetRequiredSection(BaseUrlConfiguration.CONFIG_NAME);
 builder.Services.Configure<BaseUrlConfiguration>(configSection);
-var baseUrlConfig = configSection.Get<BaseUrlConfiguration>();
 
-const string CORS_POLICY = "CorsPolicy";
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy(name: CORS_POLICY,
-        corsPolicyBuilder =>
-        {
-            // Two headless clients call the API: the shop (WebSpa) and BlazorAdmin.
-            corsPolicyBuilder.WithOrigins(
-                baseUrlConfig!.WebBase.Replace("host.docker.internal", "localhost").TrimEnd('/'),
-                baseUrlConfig.AdminBase.Replace("host.docker.internal", "localhost").TrimEnd('/'));
-            corsPolicyBuilder.AllowAnyMethod();
-            corsPolicyBuilder.AllowAnyHeader();
-        });
-});
 builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
 var jwtKey = Encoding.ASCII.GetBytes(builder.Configuration["JwtSecretKey"]!);
@@ -76,8 +61,6 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseMiddleware<ExceptionMiddleware>();
-
-app.UseCors(CORS_POLICY);
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -1,5 +1,3 @@
-﻿using System;
-using Ardalis.GuardClauses;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 
 namespace Microsoft.eShopWeb.ApplicationCore.Entities;
@@ -14,6 +12,10 @@ public class CatalogItem : BaseEntity, IAggregateRoot
     public CatalogType? CatalogType { get; private set; }
     public int CatalogBrandId { get; private set; }
     public CatalogBrand? CatalogBrand { get; private set; }
+
+    // Sync med CatalogService: Version er itemets version i CatalogService, IsDeleted markerer et slettet item (tombstone).
+    public int Version { get; private set; } = 1;
+    public bool IsDeleted { get; private set; }
 
     public CatalogItem(int catalogTypeId,
         int catalogBrandId,
@@ -30,50 +32,45 @@ public class CatalogItem : BaseEntity, IAggregateRoot
         PictureUri = pictureUri;
     }
 
-    public void UpdateDetails(CatalogItemDetails details)
+    // Opretter monolittens kopi af et item fra CatalogService med samme id,
+    // så kurve og ordrer peger på det samme item i begge databaser.
+    public static CatalogItem FromCatalogService(int id,
+        int catalogTypeId,
+        int catalogBrandId,
+        string description,
+        string name,
+        decimal price,
+        string pictureUri,
+        int version)
     {
-        Guard.Against.NullOrEmpty(details.Name, nameof(details.Name));
-        Guard.Against.NullOrEmpty(details.Description, nameof(details.Description));
-        Guard.Against.NegativeOrZero(details.Price, nameof(details.Price));
-
-        Name = details.Name;
-        Description = details.Description;
-        Price = details.Price;
+        var item = new CatalogItem(catalogTypeId, catalogBrandId, description, name, price, pictureUri);
+        item.Id = id;
+        item.Version = version;
+        return item;
     }
 
-    public void UpdateBrand(int catalogBrandId)
+    // Overskriver kopien med den nye tilstand fra CatalogService (push model: eventet bærer hele itemet).
+    public void SyncFromCatalogService(int catalogTypeId,
+        int catalogBrandId,
+        string description,
+        string name,
+        decimal price,
+        string pictureUri,
+        int version)
     {
-        Guard.Against.Zero(catalogBrandId, nameof(catalogBrandId));
-        CatalogBrandId = catalogBrandId;
-    }
-
-    public void UpdateType(int catalogTypeId)
-    {
-        Guard.Against.Zero(catalogTypeId, nameof(catalogTypeId));
         CatalogTypeId = catalogTypeId;
+        CatalogBrandId = catalogBrandId;
+        Description = description;
+        Name = name;
+        Price = price;
+        PictureUri = pictureUri;
+        Version = version;
     }
 
-    public void UpdatePictureUri(string pictureName)
+    // Rækken bliver liggende, så et forsinket created/updated med lavere version kan afvises.
+    public void MarkAsDeleted(int version)
     {
-        if (string.IsNullOrEmpty(pictureName))
-        {
-            PictureUri = string.Empty;
-            return;
-        }
-        PictureUri = $"images\\products\\{pictureName}?{new DateTime().Ticks}";
-    }
-
-    public readonly record struct CatalogItemDetails
-    {
-        public string? Name { get; }
-        public string? Description { get; }
-        public decimal Price { get; }
-
-        public CatalogItemDetails(string? name, string? description, decimal price)
-        {
-            Name = name;
-            Description = description;
-            Price = price;
-        }
+        IsDeleted = true;
+        Version = version;
     }
 }
