@@ -183,21 +183,14 @@ Ny service: `services/<Service>/` med samme struktur + `<service>.yml`, der kald
 - Ikke vejen CatalogService → RabbitMQ: ingen publisher confirms
 - Kode: `RabbitMq.cs` (`durable: true`, `DeliveryModes.Persistent`), `docker-compose.yml`
 
-**Dead Letter Channel** *(ikke lavet endnu)*
-- *Definition:* beskeder, systemet *ikke kan levere*, flyttes til en separat kanal
-- Tilfælde: fejler gentagne gange, fx SQL Server nede
-- Nu: én genlevering (`requeue: !Redelivered`), derefter droppet + logget
-- Plan: quorum queue + `x-delivery-limit`, `x-dead-letter-exchange = ""` + `x-dead-letter-routing-key = "monolith.catalog.dead"`
-- Routing key påkrævet (ellers leder default exchange efter en kø ved navn `catalog.item.*`); original routing key i headeren `x-death`
-- Kode: `CatalogSyncConsumer.cs` (`BasicNackAsync`)
-
 **Invalid Message Channel**
 - *Definition:* beskeder, modtageren *ikke kan forstå*, flyttes af modtageren til en separat kanal
-- vs. Dead Letter (udledt, siderne nævner kun hinanden som relaterede): Dead Letter = kan ikke leveres (systemets afgørelse); Invalid = leveret men ugyldig (modtagerens afgørelse) → aldrig retry
-- Tilfælde: ugyldig JSON, tom besked, ukendt routing key, `item` mangler på `created`/`updated`
-- Tjek før databasen → `InvalidMessageException` → publish uændret via default exchange til `monolith.catalog.invalid` → ack original (publish før ack: hellere to gange end tabt). Fejl logges i monolitten
+- Tilfælde: ugyldig JSON, tom besked, ukendt routing key, `item` mangler på `created`/`updated` → flyttes med det samme (aldrig retry)
+- Tjek før databasen → `InvalidMessageException`
+- Fejl under behandling (fx SQL Server nede): én genlevering (`requeue: true`), fejler den igen (`Redelivered`) → også invalid i stedet for at gå tabt
+- Flytning: publish uændret via default exchange til `monolith.catalog.invalid` → ack original (publish før ack: hellere to gange end tabt). Fejl logges i monolitten
 - `services/InvalidMessageConsumer`: konsol-app, printer beskederne (autoAck). Kører som monitor i Docker: `docker compose logs -f invalidmessageconsumer`; lokalt `dotnet run`
-- Kode: `CatalogSyncConsumer.cs` (`HandleMessage`, `catch ... InvalidMessageException`), `services/InvalidMessageConsumer/Program.cs`
+- Kode: `CatalogSyncConsumer.cs` (`HandleMessage`, `catch ... InvalidMessageException || Redelivered`), `services/InvalidMessageConsumer/Program.cs`
 
 ### Message Construction
 

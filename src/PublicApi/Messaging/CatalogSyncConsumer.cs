@@ -92,12 +92,13 @@ public class CatalogSyncConsumer : BackgroundService
                 // Ack først efter at ændringen er gemt. Crasher vi før, leveres beskeden igen.
                 await channel.BasicAckAsync(message.DeliveryTag, multiple: false);
             }
-            catch (Exception ex) when (ex is JsonException or InvalidMessageException)
+            catch (Exception ex) when (ex is JsonException or InvalidMessageException || message.Redelivered)
             {
-                // Invalid Message Channel: beskeden kan aldrig behandles, så den flyttes i stedet for at prøves igen.
+                // Invalid Message Channel: ugyldige beskeder flyttes med det samme, og beskeder, der også fejlede
+                // i andet forsøg (fx database nede), flyttes i stedet for at gå tabt.
                 // Fejlen logges her; i køen ligger kun den oprindelige besked.
                 // Publish før ack: crasher vi imellem, ender beskeden to gange i invalid-køen frem for at gå tabt.
-                _logger.LogError(ex, "Ugyldig besked {RoutingKey}, flyttes til {Queue}", message.RoutingKey, InvalidQueueName);
+                _logger.LogError(ex, "Kan ikke behandle {RoutingKey}, flyttes til {Queue}", message.RoutingKey, InvalidQueueName);
 
                 var properties = new BasicProperties { DeliveryMode = DeliveryModes.Persistent };
 
@@ -107,10 +108,10 @@ public class CatalogSyncConsumer : BackgroundService
             }
             catch (Exception ex)
             {
-                // Anden fejl (fx database nede eller concurrency-konflikt mellem replicas): prøv én gang til,
-                // ellers drop beskeden, så den ikke blokerer køen for evigt. Erstattes af Dead Letter Channel.
-                _logger.LogError(ex, "Kunne ikke behandle {RoutingKey}", message.RoutingKey);
-                await channel.BasicNackAsync(message.DeliveryTag, multiple: false, requeue: !message.Redelivered);
+                // Første fejl under behandling (fx database nede eller concurrency-konflikt mellem replicas):
+                // læg beskeden tilbage og prøv én gang til.
+                _logger.LogError(ex, "Kunne ikke behandle {RoutingKey}, prøver igen", message.RoutingKey);
+                await channel.BasicNackAsync(message.DeliveryTag, multiple: false, requeue: true);
             }
         };
 
