@@ -88,7 +88,7 @@ Catalog udskilt i trin; systemet virkede efter hvert trin:
 </td>
 <td>
 
-`docs/messaging.drawio`, publisher `services/CatalogService/CatalogService.Api/Messaging/`, consumer `src/PublicApi/Messaging/CatalogSyncConsumer.cs`, `services/InvalidMessageConsumer/`
+`docs/messaging.drawio` (EIP), `docs/messaging-overview.drawio` (RabbitMQ: exchanges, queues, bindings, connections/channels), publisher `services/CatalogService/CatalogService.Api/Messaging/`, consumer `src/PublicApi/Messaging/CatalogSyncConsumer.cs`, `services/InvalidMessageConsumer/`
 
 </td>
 </tr>
@@ -159,6 +159,42 @@ Catalog udskilt i trin; systemet virkede efter hvert trin:
 Ny service: `services/<Service>/` med samme struktur + `<service>.yml`, der kalder `_dotnet-service.yml`.
 
 ## EIP-patterns (Hohpe & Woolf) 
+
+### EIP vs. RabbitMQ (begreber)
+
+EIP beskriver *mønstre*, RabbitMQ har *byggeklodser*. Samme ord betyder ikke altid det samme.
+
+**Falske venner** (samme ord, forskellig betydning)
+
+| Ord | EIP | RabbitMQ |
+|---|---|---|
+| **channel** | Message Channel: den logiske vej, en besked sendes ad | `IChannel`: en virtuel forbindelse inde i en TCP-connection, som klienten sender kommandoer over. Har intet med routing at gøre |
+| **topic** | Navnet på en Publish-Subscribe Channel | En exchange-*type*, der router på mønstre (`*`, `#`) i routing key |
+| **dead letter** | Systemet kan ikke levere beskeden | `x-dead-letter-exchange`: udløses også, når consumeren selv afviser (`nack`, `requeue: false`), dvs. tilfælde, EIP kalder invalid |
+| **subscriber / consumer** | Subscriber = én modtager på en Pub-Sub Channel | Consumer = én forbindelse, der læser fra én kø. Én EIP-subscriber = én kø, som kan have flere consumers (replicas) |
+
+**Mapping**
+
+| EIP | RabbitMQ | Hos os |
+|---|---|---|
+| Message Channel | Ingen enkelt ting: exchange + binding + queue | – |
+| Publish-Subscribe Channel | Exchange (input) + én kø pr. subscriber (output) | `catalog` (topic) → `monolith.catalog` |
+| Point-to-Point Channel | Én kø; hver besked går til én consumer | `monolith.catalog.invalid` via default exchange |
+| Message Router | Exchange-typen (direct, topic, fanout, headers) | Topic-routing på `catalog.item.*` (RabbitMQ gør det) |
+| Subscription | Binding (exchange → kø, med binding key) | `catalog.item.*` |
+| Message | Body + properties (`delivery_mode`, `content_type`, `correlation_id` …) + routing key ved publish | JSON-body, persistent |
+| Message Endpoint | Klientkode med connection + channel | `RabbitMq.cs`, `CatalogSyncConsumer.cs`, `InvalidMessageConsumer` |
+| Messaging system | Broker (vhost `/`) | `rabbitmq:4-management` |
+| Guaranteed Delivery | Durable exchange/kø + persistent besked (+ publisher confirms) | Ja, men uden publisher confirms |
+| Durable Subscriber | Durable kø, ikke exclusive/auto-delete, navngivet efter service | `monolith.catalog` |
+| Event-Driven Consumer | `BasicConsume` (broker pusher) | Ja |
+| Polling Consumer | `BasicGet` (klienten spørger) | *(ikke brugt)* |
+| Competing Consumers | Flere consumers på samme kø + `prefetchCount` | Kun ved flere monolit-replicas |
+| Invalid Message Channel | Intet indbygget: almindelig kø, consumeren selv publicerer til | `monolith.catalog.invalid` |
+| Dead Letter Channel | DLX: `x-dead-letter-exchange` (+ `x-delivery-limit` på quorum queue) | *(fravalgt)* |
+| Format Indicator | `content_type` / `type` property | *(ikke brugt)* |
+| Correlation Identifier / Return Address | `correlation_id` / `reply_to` | *(ikke brugt, ingen Request-Reply)* |
+| Message Expiration | TTL (`expiration`, `x-message-ttl`) | *(ikke brugt)* |
 
 ### Message Channels
 
