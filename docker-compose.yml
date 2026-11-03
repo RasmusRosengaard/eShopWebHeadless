@@ -23,9 +23,16 @@ services:
       context: .
       dockerfile: src/PublicApi/Dockerfile
     depends_on:
-      - "sqlserver"
+      sqlserver:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
   sqlserver:
     image: mcr.microsoft.com/azure-sql-edge
+    # Monolittens database. Uden volume ligger den inde i containeren og seedes forfra, når containeren
+    # genskabes, mens CatalogService beholder sine data, og så er kopierne ude af sync.
+    volumes:
+      - sqlserver-data:/var/opt/mssql
     ports:
       - "1433:1433"
     environment:
@@ -38,3 +45,48 @@ services:
       dockerfile: services/ReverseProxy/ReverseProxy.Api/Dockerfile
     depends_on:
       - "eshoppublicapi"
+      - "catalogservice"
+  catalogservice:
+    image: ${DOCKER_REGISTRY-}catalogservice
+    build:
+      context: .
+      dockerfile: services/CatalogService/CatalogService.Api/Dockerfile
+    depends_on:
+      catalogdb:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    restart: on-failure
+  catalogdb:
+    image: postgres:17
+    # Navngivet volume i stedet for den anonyme, image'et selv laver, så data også overlever docker compose down.
+    volumes:
+      - catalogdb-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=catalog
+      - POSTGRES_PASSWORD=catalogpassword
+      - POSTGRES_DB=catalogdb
+    ports:
+      - "5433:5432"
+  rabbitmq:
+    image: rabbitmq:4-management
+    # Durable køer og persistent beskeder skrives til disk. Uden en volume ligger den disk i containeren
+    # og slettes, når containeren genskabes, så beskeder, der venter på en consumer, går tabt.
+    # Fast hostname, fordi RabbitMQ gemmer sine data i en mappe opkaldt efter værtsnavnet.
+    hostname: rabbitmq
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=catalog
+      - RABBITMQ_DEFAULT_PASS=catalogpassword
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  rabbitmq-data:
+  catalogdb-data:
+  sqlserver-data:
+

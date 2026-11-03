@@ -25,6 +25,11 @@ public class CatalogItemConfiguration : IEntityTypeConfiguration<CatalogItem>
         builder.Property(ci => ci.PictureUri)
             .IsRequired(false);
 
+        // Concurrency token: hvis to replicas af monolitten opdaterer samme item samtidig, fejler den ene
+        // i stedet for at overskrive en nyere version med en ældre.
+        builder.Property(ci => ci.Version)
+            .IsConcurrencyToken();
+
         builder.HasOne(ci => ci.CatalogBrand)
             .WithMany()
             .HasForeignKey(ci => ci.CatalogBrandId);
