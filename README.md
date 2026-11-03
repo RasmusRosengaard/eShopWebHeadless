@@ -66,12 +66,20 @@ Catalog udskilt i trin; systemet virkede efter hvert trin:
 - YARP = eneste indgang; catalog-routes → CatalogService, catch-all → monolitten
 - CORS samlet i gatewayen → preflights besvares, selv hvis servicen bag er nede
 - Autentificering: JWT valideres i servicerne, ikke i gatewayen
-- Mangler: load balancing (én destination pr. cluster) og rate-limiting
+- Load balancing i YARP: `catalog-cluster` har 2 destinations (`catalogservice`, `catalogservice-2`), `PowerOfTwoChoices` (YARPs standard: vælger 2 tilfældige, sender til den med færrest aktive requests)
+  - Aktivt health check: YARP kalder `/health` hvert 10. sek. → instans, der ikke svarer, får ingen trafik
+  - Testet: 30 requests fordelt på begge (15/15 med `RoundRobin`, ca. 13/17 med `PowerOfTwoChoices`); instans 1 stoppet → alle requests svarer stadig 200
+  - Horisontal, men statisk skalering: antal ligger fast i `docker-compose.yml` + `appsettings.Docker.json`
+  - Kun CatalogService har 2 instanser → skaleres uafhængigt af monolitten; stateless (JWT), deler én database
+  - Docker health check på begge: `curl -f http://localhost:8080/health` (curl installeret i Dockerfile)
+  - `catalogservice-2` venter på, at instans 1 er healthy, så migration og seed ikke kører samtidig
+- Fravalgt: Docker Swarm (`docker service scale`). Testet: Swarm fordeler pr. TCP-forbindelse, og YARP genbruger sin forbindelse → alle requests via gatewayen ramte samme replica. Kræver, at YARP selv slår replicas op (`tasks.catalogservice` + `AddDnsDestinationResolver`)
+- Mangler: rate-limiting
 
 </td>
 <td>
 
-`services/ReverseProxy/ReverseProxy.Api/` (`Program.cs`, `appsettings*.json`)
+`services/ReverseProxy/ReverseProxy.Api/` (`Program.cs`, `appsettings*.json`), `docker-compose.yml` (`catalogservice-2`)
 
 </td>
 </tr>

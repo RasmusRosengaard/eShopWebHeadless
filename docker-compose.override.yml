@@ -1,34 +1,38 @@
-version: '3.4'
 services:
- eshopwebspa:
-   ports:
-     - "5106:80"
- eshopblazoradmin:
-   ports:
-     - "5107:80"
- eshoppublicapi:
-   environment:
-     - ASPNETCORE_ENVIRONMENT=Docker
-     - ASPNETCORE_URLS=http://+:8080
-   ports:
-     - "5200:8080"
-   volumes:
-     - ~/.aspnet/https:/root/.aspnet/https:ro
-     - ~/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
- reverseproxy:
-   environment:
-     - ASPNETCORE_ENVIRONMENT=Docker
-   ports:
-     - "5300:8080"
- catalogservice:
+  eshopwebspa:
+    ports:
+      - "5106:80"
+  eshopblazoradmin:
+    ports:
+      - "5107:80"
+  eshoppublicapi:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:8080
+    ports:
+      - "5200:8080"
+    volumes:
+      - ~/.aspnet/https:/root/.aspnet/https:ro
+      - ~/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
+  reverseproxy:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+    ports:
+      - "5300:8080"
+  catalogservice:
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
     ports:
       - "5400:8080"
- invalidmessageconsumer:
-   environment:
-     - DOTNET_ENVIRONMENT=Docker
- rabbitmq:
-   ports:
-     - "5673:5672"
-     - "15673:15672"
+  catalogservice-2:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+    ports:
+      - "5401:8080"
+  invalidmessageconsumer:
+    environment:
+      - DOTNET_ENVIRONMENT=Docker
+  rabbitmq:
+    ports:
+      - "5673:5672"
+      - "15673:15672"

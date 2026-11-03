@@ -1,5 +1,3 @@
-version: '3.4'
-
 services:
   eshopwebspa:
     image: ${DOCKER_REGISTRY-}eshopwebspa
@@ -46,6 +44,7 @@ services:
     depends_on:
       - "eshoppublicapi"
       - "catalogservice"
+      - "catalogservice-2"
   catalogservice:
     image: ${DOCKER_REGISTRY-}catalogservice
     build:
@@ -57,6 +56,29 @@ services:
       rabbitmq:
         condition: service_healthy
     restart: on-failure
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  # Instans 2 af CatalogService: samme image og database. YARP fordeler trafikken mellem de to (se appsettings.Docker.json).
+  # Venter på instans 1, så migration og seed ikke kører i begge på samme tid.
+  catalogservice-2:
+    image: ${DOCKER_REGISTRY-}catalogservice
+    build:
+      context: .
+      dockerfile: services/CatalogService/CatalogService.Api/Dockerfile
+    depends_on:
+      catalogservice:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
   invalidmessageconsumer:
     image: ${DOCKER_REGISTRY-}invalidmessageconsumer
     build:
