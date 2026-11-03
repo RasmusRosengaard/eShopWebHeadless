@@ -74,11 +74,12 @@ CatalogService publicerer `catalog.item.created/updated/deleted` på topic excha
 - **Competing Consumers**: consumeren er bygget, så flere instanser kan læse fra samme kø. Det er netop derfor, Idempotent Receiver er nødvendig. CatalogService skaleres derimod ikke som consumer, fordi den modtager sine ændringer som HTTP-requests og derfor skaleres med replicas i Docker Swarm, hvor Swarm load balancer requests fra API Gatewayen. Versionen beskyttes med optimistic concurrency i databasen, så to instanser aldrig udsteder samme version.
 - **Durable Subscriber**: monolittens kø `monolith.catalog` er durable og bundet til exchangen med `catalog.item.*`. Er monolitten nede, venter ændringerne i køen og behandles, når den starter igen (eventually consistent). Exchange og kø er durable, beskederne persistent, og RabbitMQ har en volume, så de også overlever en genstart af brokeren.
 - **Event-Driven Consumer**: `CatalogSyncConsumer` kører som `BackgroundService` i monolitten, og RabbitMQ pusher beskederne til den. Den sender først ack, når ændringen er gemt.
+- **Invalid Message Channel**: beskeder, consumeren ikke kan forstå (fx ugyldig JSON eller manglende `item`), prøves ikke igen, men flyttes til køen `monolith.catalog.invalid`, så de ikke blokerer eller går tabt. En lille konsol-app, `InvalidMessageConsumer`, læser køen.
 - **Resequencer (fravalgt)**: den forudsætter en ubrudt sekvens, så et tabt event ville blokere alle efterfølgende. Da events er Document Messages med hele itemets tilstand, er det nok at droppe forældede events i stedet for at sortere dem.
 </td>
 <td>
 
-For at tjekke kig i `docs/messaging.drawio`, publisheren i `services/CatalogService/CatalogService.Api/Messaging/` og consumeren i `src/PublicApi/Messaging/CatalogSyncConsumer.cs`
+For at tjekke kig i `docs/messaging.drawio`, publisheren i `services/CatalogService/CatalogService.Api/Messaging/` og consumeren i `src/PublicApi/Messaging/CatalogSyncConsumer.cs` samt `services/InvalidMessageConsumer/`
 
 Se også afsnittet [EIP-patterns](#eip-patterns).
 
@@ -139,159 +140,117 @@ Ny service: opret `services/<Service>/` med samme struktur og et lille `<service
 
 > **Skelet (udkast):** overskrifter og stikord er skrevet af AI (Claude) ud fra koden. Teksten skal skrives færdig og rettes til af mig.
 
-Format pr. pattern: **Teori** (hvad mønstret er), **Hos os** (hvordan vi bruger det), **Kode** (hvor det ligger).
+Hvert pattern starter med definitionen fra *Enterprise Integration Patterns* (Hohpe & Woolf), derefter hvordan det er brugt, og hvor koden ligger.
 
 ### Message Channels
 
-**Send and forget + store and forward** *(grundidéen i asynkron messaging)*
-- Send and forget: CatalogService publicerer og svarer admin med det samme; den venter ikke på, at monolitten har behandlet ændringen
-- Store and forward: RabbitMQ gemmer beskeden og sender den videre, når modtageren er klar → derfor kan monolitten være nede (eventually consistent)
-- Kode: `RabbitMq.cs` (`Publish` returnerer, når beskeden er afleveret til RabbitMQ), `CatalogSyncConsumer.cs`
+**Send and forget + store and forward** *(grundprincipperne i messaging)*
+- *Send and forget:* afsenderen afleverer beskeden til messaging-systemet og fortsætter uden at vente på modtageren
+- *Store and forward:* messaging-systemet gemmer beskeden og sender den videre, når modtageren er tilgængelig
+- CatalogService svarer admin, så snart beskeden er afleveret til RabbitMQ; RabbitMQ holder beskeden, til monolitten er klar → monolitten må være nede (eventually consistent)
+- Kode: `RabbitMq.cs` (`Publish`), `CatalogSyncConsumer.cs`
 
 **Publish-Subscribe Channel**
-- Teori: én afsender, en kopi af beskeden til hver subscriber
-- Hos os: den *logiske* kanal for catalog-events; implementeret som topic exchange `catalog` + én kø pr. subscriber
-- Hos os: publisher kender ikke subscribers; nye services binder bare en ny kø og får deres egen kopi
-- Hos os: routing keys `catalog.item.created/updated/deleted`; binding `catalog.item.*`
-- Kode: `services/CatalogService/CatalogService.Api/Messaging/RabbitMq.cs` (`ExchangeDeclareAsync`)
+- *Definition:* én kanal, der leverer en kopi af hver besked til hver interesseret modtager. Kanalen har én input channel, der deles ud i flere output channels, én pr. subscriber; hver output channel har kun én subscriber
+- Input channel = topic exchange `catalog`; output channel = én kø pr. subscribende service, for monolitten `monolith.catalog`
+- Køen er navngivet efter servicen, ikke instansen: monolitten er *én* subscriber, uanset antal replicas (se Competing Consumers)
+- CatalogService kender ikke sine subscribers; en ny service binder blot sin egen kø
+- Routing keys `catalog.item.created/updated/deleted`; monolitten binder `catalog.item.*`
+- Kode: `RabbitMq.cs` (`ExchangeDeclareAsync`), `src/PublicApi/Messaging/CatalogSyncConsumer.cs` (`QueueDeclareAsync`, `QueueBindAsync`)
 
-**Point-to-Point Channel** *(inde i den enkelte subscriber)*
-- Teori: hver besked behandles af præcis én modtager
-- Hos os: ikke en kanal ved siden af Pub-Sub, men et lag under: exchangen giver hver *service* en kopi (Pub-Sub), køen `monolith.catalog` giver hver kopi til præcis én *replica* af monolitten (Point-to-Point → Competing Consumers)
-- Hos os: køen navngives efter servicen, ikke instansen, ellers får hver replica sin egen kopi
-- Kode: `src/PublicApi/Messaging/CatalogSyncConsumer.cs` (`QueueDeclareAsync`, `QueueBindAsync`)
+**Point-to-Point Channel** *(ikke brugt)*
+- *Definition:* en kanal, der sikrer, at kun én modtager forbruger en given besked
+- CatalogService sender aldrig til én bestemt modtager; den publicerer events til alle interesserede. Point-to-Point hører typisk sammen med Command Messages, som vi ikke bruger
 
 **Guaranteed Delivery**
-- Teori: store and forward med beskeden gemt på disk, så den ikke går tabt, hvis messaging-systemet går ned
-- Hos os (RabbitMQ-begreber): **durable** exchange og kø (topologien overlever genstart) + **persistent** beskeder (`delivery_mode: 2`, beskeden overlever genstart) + volume på RabbitMQ
-- Forskel fra Durable Subscriber: Guaranteed Delivery beskytter mod at *brokeren* går ned, Durable Subscriber mod at *modtageren* er offline
-- Begrænsning: ingen publisher confirms; dual write (DB gemt, publish fejler) → Outbox som mulig løsning
-- Kode: `RabbitMq.cs` (`durable: true`, `DeliveryModes.Persistent`), `docker-compose.yml` (`rabbitmq-data`)
+- *Definition:* messaging-systemet gemmer beskeder i et persistent lager, så de ikke går tabt, selvom systemet går ned (store and forward med disk)
+- RabbitMQ: **durable** exchange og kø (topologien overlever genstart) + **persistent** beskeder (`delivery_mode: 2`) + volume `rabbitmq-data`
+- Forskel fra Durable Subscriber: Guaranteed Delivery beskytter mod, at *brokeren* går ned; Durable Subscriber mod, at *modtageren* er offline
+- Gælder ikke vejen fra CatalogService til RabbitMQ: ingen publisher confirms, og dual write (DB gemt, publish fejler) → Transactional Outbox som løsning
+- Kode: `RabbitMq.cs` (`durable: true`, `DeliveryModes.Persistent`), `docker-compose.yml`
 
 **Dead Letter Channel** *(ikke lavet endnu)*
-- Teori: beskeder, der ikke kan behandles, flyttes til en separat kanal i stedet for at gå tabt
-- Hos os nu: én genlevering (`requeue: !Redelivered`), derefter droppes beskeden og logges
-- Idé: quorum queue med `x-delivery-limit` + `x-dead-letter-routing-key` → `monolith.catalog.dead`
+- *Definition:* beskeder, som messaging-systemet *ikke kan levere*, flyttes til en separat kanal i stedet for at gå tabt
+- Tilfælde: beskeden fejler gentagne gange, fx fordi SQL Server er nede
+- Nu: én genlevering (`requeue: !Redelivered`), derefter droppes og logges beskeden
+- Idé: `x-delivery-limit` (quorum queue) + `x-dead-letter-exchange = ""` (default exchange) og `x-dead-letter-routing-key = "monolith.catalog.dead"` → kø `monolith.catalog.dead`. Routing key er påkrævet: uden den beholder beskeden `catalog.item.*`, og default exchange finder ingen kø med det navn. Den oprindelige routing key ligger i headeren `x-death`
 - Kode: `CatalogSyncConsumer.cs` (`BasicNackAsync`)
+
+**Invalid Message Channel**
+- *Definition:* beskeder, som modtageren *ikke kan forstå* (forkert format, manglende felter), flyttes af modtageren til en separat kanal
+- Forskel fra Dead Letter (udledt af EIP, siderne nævner kun hinanden som relaterede): Dead Letter = levering lykkes ikke (messaging-systemets afgørelse); Invalid = beskeden er leveret, men ugyldig (modtagerens afgørelse). En ugyldig besked skal ikke prøves igen
+- Tilfælde: JSON kan ikke deserialiseres, tom besked, ukendt routing key, eller `item` mangler på et `created`/`updated`
+- `HandleMessage` tjekker beskeden, før databasen røres, og kaster `InvalidMessageException`. Consumeren publicerer så den uændrede besked via default exchange til kø `monolith.catalog.invalid` og acker originalen (publish før ack, så den hellere havner der to gange end går tabt). Fejlen logges i monolitten
+- `services/InvalidMessageConsumer` er en lille konsol-app, der læser køen og printer beskederne (autoAck)
+- Kode: `CatalogSyncConsumer.cs` (`HandleMessage`, `catch ... InvalidMessageException`), `services/InvalidMessageConsumer/Program.cs`
 
 ### Message Construction
 
 **Event Message**
-- Teori: beskeden fortæller, at noget er sket (ikke en kommando)
-- Hos os: `created`, `updated`, `deleted` i datid; metadata `eventId` (sporing), `occurredAt`, `version`
+- *Definition:* en besked, der underretter om, at noget er sket, så modtageren kan reagere asynkront
+- `catalog.item.created/updated/deleted` i datid (ikke kommandoer som `UpdateItem`); afsenderen bestemmer ikke, hvad modtageren gør
+- Metadata: `eventId` (unikt id til sporing), `occurredAt`, `version`
 - Kode: `services/CatalogService/CatalogService.Api/Messaging/CatalogEvents.cs`
 
-**Document Message (push model)**
-- Teori: beskeden bærer selve dataene
-- Hos os: `created`/`updated` sender hele itemet → consumeren skal ikke kalde CatalogService tilbage; `deleted` sender kun `id` (ren notifikation)
-- Hos os: `pictureUri` sendes som færdig URL, så monolitten ikke behøver catalog-logik
+**Document Message**
+- *Definition:* en besked, der overfører en datastruktur; modtageren bestemmer selv, hvad den gør med dataene
+- `created`/`updated` er både Event og Document Message (EIP's *push model*): hele itemet sendes med, så monolitten ikke skal kalde CatalogService tilbage (*pull model*)
+- `deleted` er en ren Event Message med kun `id`
+- `pictureUri` sendes som færdig URL, så monolitten ikke behøver catalog-logik
 - Kode: `CatalogEvents.cs` (`ToData`)
 
 **Format Indicator** *(ikke brugt)*
-- Teori: felt der angiver beskedens format/schema-version
-- Hos os: `version` er **itemets** version, ikke beskedformatets; forveksl dem ikke
-- Hvornår: hvis beskedformatet ændres, og gamle og nye consumers skal kunne leve side om side
+- *Definition:* et felt i beskeden, der angiver dens format (versionsnummer, foreign key til et schema eller selve schemaet)
+- `version` i vores beskeder er **itemets** version, ikke beskedformatets; de to må ikke forveksles
+- Bliver relevant, når beskedformatet ændres, og gamle og nye consumers skal leve side om side (fx `formatVersion: 2`)
 
 ### Message Endpoints
 
 **Message Endpoint**
-- Teori: den kode, der forbinder en applikation med messaging-systemet
-- Hos os: CatalogService (publisher) og monolitten (consumer)
+- *Definition:* den del af en applikation, der forbinder den med en messaging-kanal og sender eller modtager beskeder
+- CatalogService (sender) og monolitten (modtager)
 - Kode: `services/CatalogService/CatalogService.Api/Messaging/`, `src/PublicApi/Messaging/`
 
 **Messaging Gateway**
-- Teori: skjuler messaging bag metoder i domænets sprog
-- Hos os: `ICatalogEvents` med `CatalogItemCreated(item)` osv.; endpoints kender hverken RabbitMQ, routing keys eller JSON
-- Gevinst: integrationstests erstatter gatewayen med Moq (`Mock.Of<ICatalogEvents>()`)
+- *Definition:* en klasse, der indkapsler al messaging-kode og udstiller domænespecifikke metoder til resten af applikationen
+- `ICatalogEvents` med `CatalogItemCreated(item)` osv.; endpoints kender hverken RabbitMQ, routing keys eller JSON
+- Gatewayen kan udskiftes: integrationstestene bruger `Mock.Of<ICatalogEvents>()`
 - Kode: `Interfaces/ICatalogEvents.cs`, `Messaging/CatalogEvents.cs`, `tests/CatalogService.IntegrationTests/CatalogServiceFactory.cs`
 
+**Messaging Mapper**
+- *Definition:* flytter data mellem domæneobjekter og beskeder, så hverken domænet kender beskedformatet eller beskeden kender domænet
+- Publisher: `ToData` mapper `CatalogItem` til beskedens `item` og laver relativ `PictureUri` om til færdig URL (`ComposePicUri`); `CatalogItemDeleted` beregner `version + 1`. JSON-serialiseringen sker i `RabbitMq.Publish`
+- Consumer: JSON → `CatalogEventMessage` (privat klasse) → `CatalogItem.FromCatalogService(...)` / `SyncFromCatalogService(...)`; entiteten får kun primitive værdier og kender ikke beskedklassen
+- Forskel fra **Message Translator** *(ikke brugt)*: en Translator oversætter en *besked* til en anden *besked* (format A → format B) mellem to kanaler. Messaging Mapper ligger i endpointet og mapper mellem *domæneobjekt* og besked. Begge services mapper direkte til/fra det fælles beskedformat, så der er ingen Translator
+- Kode: `Messaging/CatalogEvents.cs` (`ToData`), `src/PublicApi/Messaging/CatalogSyncConsumer.cs` (`HandleMessage`)
+
 **Event-Driven Consumer**
-- Teori: RabbitMQ pusher beskeder til consumeren (modsat Polling Consumer, der selv spørger)
-- Hos os: `BackgroundService` i monolitten med `AsyncEventingBasicConsumer`; skaleres sammen med monolitten
+- *Definition:* en consumer, der får beskeder leveret automatisk, når de ankommer (modsat Polling Consumer, der selv spørger)
+- `BackgroundService` i monolitten med `AsyncEventingBasicConsumer`; RabbitMQ pusher, og `ReceivedAsync` kaldes
 - Kode: `CatalogSyncConsumer.cs` (`ReceivedAsync`)
 
 **Durable Subscriber**
-- Teori: subscriberen mister ikke beskeder, mens den er offline
-- Hos os: durable kø → ændringer, mens monolitten er nede, behandles, når den starter (eventually consistent)
-- Forudsætning: køen skal være oprettet (første opstart af monolitten)
+- *Definition:* en subscriber på en Publish-Subscribe Channel, hvor messaging-systemet gemmer beskeder, mens subscriberen er afkoblet
+- Durable kø `monolith.catalog`: ændringer, mens monolitten er nede, behandles, når den starter igen
+- Forudsætning: køen skal være oprettet (første opstart af monolitten); beskeder publiceret før det har ingen kø at lande i
 - Kode: `CatalogSyncConsumer.cs` (`QueueDeclareAsync(durable: true)`)
 
 **Idempotent Receiver**
-- Teori: samme besked kan modtages flere gange uden at have effekt mere end én gang
-- Hos os: `version <= gemt` → ignorér; ét tjek dækker både dubletter og forkert rækkefølge
-- Hos os: tombstone (`IsDeleted`) i stedet for at slette, så et forsinket event ikke genopliver et item
+- *Definition:* en modtager, der kan modtage den samme besked flere gange uden at effekten gentages
+- `message.version <= gemt version` → ignorér. Dækker dubletter (genlevering efter manglende ack)
+- Samme tjek afviser også forældede events, der ankommer i forkert rækkefølge; det går ud over ren idempotens og erstatter en Resequencer
+- Tombstone (`IsDeleted`) i stedet for at slette rækken, så et forsinket `updated` ikke genopliver et slettet item
 - Kode: `CatalogSyncConsumer.cs` (`HandleMessage`), `src/ApplicationCore/Entities/CatalogItem.cs`
 
 **Competing Consumers**
-- Teori: flere consumers læser fra samme kø for at skalere
-- Hos os: replicas af monolitten deler `monolith.catalog`; `prefetchCount: 1`
-- Hos os: `Version` som concurrency token, så to replicas ikke overskriver hinanden
+- *Definition:* flere consumers på samme kanal, som konkurrerer om beskederne og behandler dem samtidig; hver besked behandles af kun én af dem
+- Replicas af monolitten deler Pub-Sub-kanalens output channel `monolith.catalog`; `prefetchCount: 1`, så en replica kun tager én besked ad gangen
+- Samme kombination som EIP's Google Cloud Pub/Sub-eksempel: topic giver Publish-Subscribe, subscription giver Competing Consumers
+- `Version` som concurrency token, så to replicas ikke overskriver hinanden
 - Kode: `CatalogSyncConsumer.cs` (`BasicQosAsync`), `src/Infrastructure/Data/Config/CatalogItemConfiguration.cs`
 
-**Transactional Client** *(delvist)*
-- Teori: modtagelse/afsendelse af beskeden hænger sammen med ændringen i databasen
-- Hos os (consumer): manuel ack først efter gem (`autoAck: false`) → crash før ack = beskeden leveres igen
-- Hos os (publisher): publish sker efter gem, men ikke i samme transaktion → dual write; Transactional Outbox som løsning
+**Transactional Client** *(ikke brugt)*
+- *Definition:* en klient, hvis session med messaging-systemet er transaktionel, så afsendelse/modtagelse og fx en databaseændring commit'es samlet
+- Consumer: manuel ack efter gem (`autoAck: false`) giver *at-least-once*, ikke en transaktion; crash mellem gem og ack → beskeden leveres igen, og Idempotent Receiver fanger dubletten
+- Publisher: publish sker efter gem, men i en anden transaktion → dual write; Transactional Outbox løser det
 - Kode: `CatalogSyncConsumer.cs` (`BasicAckAsync`), `CreateCatalogItemEndpoint.cs` m.fl.
-
-# eShopOnWeb – Headless, det nye startsted hvor WebSpa ikke er SSR
-
-> **Historisk:** afsnittet herunder beskriver udgangspunktet, før strangler-arbejdet gik i gang. Siden er Catalog udskilt i `services/CatalogService`, klienterne går gennem gatewayen (Docker: http://localhost:5300), og CORS ligger i gatewayen i stedet for PublicApi. Se `docs/ports.md` for den aktuelle opsætning.
-
-Fork af [dotnet-architecture/eShopOnWeb](https://github.com/dotnet-architecture/eShopOnWeb). Den server-renderede `Web`-monolit er erstattet af headless klienter, der kun taler med `PublicApi`.
-Formålet er at gøre løsningen klar til **Strangler Pattern**: alle klik i UI'et er nu API-kald, så en gateway kan route dem til nye services én ad gangen.
-Der er **ingen microservices endnu**. Domænet, databasen og al logik er den samme som i originalen. 
-
-## Arkitektur
-
-```
-FØR
-  Browser ──► Web (SSR) ────────────────────────────────┐
-               │ hoster                    in-process   ▼
-               └─► BlazorAdmin ──► PublicApi ──► ApplicationCore + Infrastructure ──► DB
-
-EFTER
-  Browser ──► WebSpa ──────┐
-                           ├──► PublicApi ──► ApplicationCore + Infrastructure ──► DB
-  Browser ──► BlazorAdmin ─┘   HTTP + JWT
-                                └────────────────── monolit ─────────────────┘
-```
-
-## Ændringer
-
-1. **`src/Web` er fjernet**: Razor Pages, MVC-views, Identity UI, cookie-login, Manage-sider og health checks.
-2. **Webs logik er flyttet til `PublicApi`** som nye endpoints. ApplicationCore er uændret.
-   - `GET/POST/PUT api/basket…`: kurv. Erstatter Basket-siderne og `BasketViewModelService`.
-   - `POST api/basket/transfer`: flytter den anonyme kurv til brugeren ved login, ligesom Webs login gjorde.
-   - `POST api/orders`: checkout. Erstatter Checkout-siden.
-   - `GET api/orders`, `GET api/orders/{id}`: ordrehistorik. Erstatter `OrderController` og MediatR-handlerne.
-   - `POST api/register`: oprettelse af bruger. Erstatter Identity Register-siden.
-   - Anonym kurv: SPA'en sender et GUID i headeren `X-Anonymous-Id`, som erstatter kurv-cookien.
-3. **Ny `src/WebSpa`** (Blazor WebAssembly, shop): bygget på samme måde som BlazorAdmin (samme projekttype, `BlazorShared`-modeller, lookup-services og JWT mod PublicApi). Webs CSS og billeder er flyttet hertil, så shoppen ser ud som før.
-4. **`BlazorAdmin` er nu standalone**: UI'et og admin-logikken er uændret. Den var tidligere hostet af Web og fik login via Webs cookie og `/User`-endpoint. Nu har den sin egen `index.html` og login-side, og den henter JWT fra `api/authenticate`.
-5. **Konfiguration**: `baseUrls.adminBase` er tilføjet, CORS i PublicApi tillader begge klienter, og `CatalogBaseUrl` peger på WebSpa, så produktbilleder virker i begge klienter.
-6. **Tests**:
-   - Tests, der testede Web, er fjernet (`FunctionalTests/Web`, `UnitTests/Web`, `UnitTests/MediatorHandlers`).
-   - `CatalogItemListPagedEndpoint`-testen bruger nu API'ets egen response i stedet for Webs viewmodel.
-   - Nye integrationstests for kurv, checkout/ordrer og registrering i `PublicApiIntegrationTests`.
-7. **Docker**: WebSpa og BlazorAdmin har hver sin Dockerfile (publish → nginx). `docker-compose` kører `webspa`, `blazoradmin`, `publicapi` og `sqlserver`.
-8. **Andet**: `global.json` tillader nyere SDK'er (`latestMajor`), og `.vscode` peger på PublicApi. `azure.yaml`/`infra` (azd-deploy af Web) er **ikke** opdateret.
-
-## Kør lokalt
-
-| App | URL |
-|---|---|
-| PublicApi (Swagger) | https://localhost:5099/swagger |
-| WebSpa (shop) | https://localhost:5001 |
-| BlazorAdmin | https://localhost:5003 |
-
-```bash
-dotnet run --project src/PublicApi      # sæt UseOnlyInMemoryDatabase=true for at undgå LocalDB
-dotnet run --project src/WebSpa
-dotnet run --project src/BlazorAdmin
-```
-
-Docker: `docker compose up --build` starter shop på http://localhost:5106, admin på http://localhost:5107 og API på http://localhost:5200.
-
-Demo-brugere: `demouser@microsoft.com` / `admin@microsoft.com`, password `Pass@word1`.
-

@@ -64,6 +64,7 @@ docker eshoppublicapi:8080                docker catalogservice:8080
         │  │ CatalogSyncConsumer             │            │ publish catalog.item.*
         │  └──── kø monolith.catalog ◄──── RabbitMQ ◄─────┘
         │        (catalog.item.*)          exchange "catalog"
+        │  ugyldige → kø monolith.catalog.invalid ──► InvalidMessageConsumer (konsol-app)
         │                                  lokalt localhost:5673 · docker rabbitmq:5672
         ▼                                    ▼
 SQL Server (read-only kopi af catalog)    PostgreSQL (catalog, ejer data)
@@ -88,6 +89,7 @@ docker sqlserver:1433                     lokalt localhost:5433
 | CatalogService-database (Postgres) | `docker-compose.yml` (`catalogdb`) | `5433 → 5432`, db `catalogdb`, bruger `catalog` |
 | CatalogService → RabbitMQ (publisher) | `services/CatalogService/CatalogService.Api/appsettings.Development.json` / `appsettings.Docker.json` | `rabbitMq` → `localhost:5673` / `rabbitmq:5672` |
 | PublicApi → RabbitMQ (consumer) | `src/PublicApi/appsettings.Development.json` / `appsettings.Docker.json` | `rabbitMq` → `localhost:5673` / `rabbitmq:5672` |
+| InvalidMessageConsumer → RabbitMQ (konsol-app, læser `monolith.catalog.invalid`) | `services/InvalidMessageConsumer/appsettings.Development.json` / `appsettings.Docker.json` (vælges med `DOTNET_ENVIRONMENT`, standard Development) | `rabbitMq` → `localhost:5673` / `rabbitmq:5672` |
 | RabbitMQ | `docker-compose.yml` / `docker-compose.override.yml` (`rabbitmq`) | `5673 → 5672`, `15673 → 15672`, bruger `catalog` |
 
 ## Health check

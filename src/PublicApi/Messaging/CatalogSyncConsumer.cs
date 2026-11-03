@@ -24,6 +24,7 @@ public class CatalogSyncConsumer : BackgroundService
     private const string ExchangeName = "catalog";
     private const string QueueName = "monolith.catalog";
     private const string BindingKey = "catalog.item.*";
+    private const string InvalidQueueName = "monolith.catalog.invalid";
 
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
@@ -74,6 +75,10 @@ public class CatalogSyncConsumer : BackgroundService
         await channel.QueueDeclareAsync(QueueName, durable: true, exclusive: false, autoDelete: false);
         await channel.QueueBindAsync(QueueName, ExchangeName, BindingKey);
 
+        // Invalid Message Channel: beskeder, consumeren ikke kan forstå, parkeres her til manuel inspektion.
+        // Ingen binding: vi publicerer via default exchange, som leverer til køen med samme navn som routing key.
+        await channel.QueueDeclareAsync(InvalidQueueName, durable: true, exclusive: false, autoDelete: false);
+
         // Én besked ad gangen pr. consumer, så en replica ikke tager flere, end den kan nå.
         await channel.BasicQosAsync(prefetchSize: 0, prefetchCount: 1, global: false);
 
@@ -87,10 +92,23 @@ public class CatalogSyncConsumer : BackgroundService
                 // Ack først efter at ændringen er gemt. Crasher vi før, leveres beskeden igen.
                 await channel.BasicAckAsync(message.DeliveryTag, multiple: false);
             }
+            catch (Exception ex) when (ex is JsonException or InvalidMessageException)
+            {
+                // Invalid Message Channel: beskeden kan aldrig behandles, så den flyttes i stedet for at prøves igen.
+                // Fejlen logges her; i køen ligger kun den oprindelige besked.
+                // Publish før ack: crasher vi imellem, ender beskeden to gange i invalid-køen frem for at gå tabt.
+                _logger.LogError(ex, "Ugyldig besked {RoutingKey}, flyttes til {Queue}", message.RoutingKey, InvalidQueueName);
+
+                var properties = new BasicProperties { DeliveryMode = DeliveryModes.Persistent };
+
+                await channel.BasicPublishAsync(exchange: "", routingKey: InvalidQueueName, mandatory: false,
+                    basicProperties: properties, body: message.Body);
+                await channel.BasicAckAsync(message.DeliveryTag, multiple: false);
+            }
             catch (Exception ex)
             {
-                // Prøv én gang til (fx ved en concurrency-konflikt mellem replicas), ellers drop beskeden,
-                // så en ugyldig besked ikke blokerer køen for evigt.
+                // Anden fejl (fx database nede eller concurrency-konflikt mellem replicas): prøv én gang til,
+                // ellers drop beskeden, så den ikke blokerer køen for evigt. Erstattes af Dead Letter Channel.
                 _logger.LogError(ex, "Kunne ikke behandle {RoutingKey}", message.RoutingKey);
                 await channel.BasicNackAsync(message.DeliveryTag, multiple: false, requeue: !message.Redelivered);
             }
@@ -104,7 +122,21 @@ public class CatalogSyncConsumer : BackgroundService
 
     private async Task HandleMessage(string routingKey, byte[] body)
     {
-        var message = JsonSerializer.Deserialize<CatalogEventMessage>(body, JsonOptions)!;
+        // Tjek beskeden, før databasen røres, så en ugyldig besked altid ender i invalid-køen,
+        // også hvis databasen er nede.
+        var message = JsonSerializer.Deserialize<CatalogEventMessage>(body, JsonOptions)
+            ?? throw new InvalidMessageException("Tom besked");
+
+        if (routingKey != "catalog.item.created" && routingKey != "catalog.item.updated" && routingKey != "catalog.item.deleted")
+        {
+            throw new InvalidMessageException($"Ukendt routing key {routingKey}");
+        }
+
+        if (routingKey != "catalog.item.deleted" && message.Item == null)
+        {
+            throw new InvalidMessageException("item mangler");
+        }
+
         var id = message.Item?.Id ?? message.Id;
 
         using var scope = _scopeFactory.CreateScope();
@@ -153,6 +185,13 @@ public class CatalogSyncConsumer : BackgroundService
 
         _logger.LogInformation("Synkroniserede {RoutingKey} for item {Id} (version {Version})", routingKey, id, message.Version);
     }
+
+    // Kastes, når beskeden aldrig kan behandles, uanset hvor mange gange den prøves (Invalid Message Channel).
+    private class InvalidMessageException : Exception
+    {
+        public InvalidMessageException(string message) : base(message) { }
+    }
+
     private class CatalogEventMessage
     {
         public int Version { get; set; }
