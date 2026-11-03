@@ -1,41 +1,41 @@
 <mxfile host="65bd71144e">
     <diagram name="Messaging" id="messaging">
-        <mxGraphModel dx="905" dy="971" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="1239" dy="1002" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
                 <mxCell id="title" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=22;fontColor=#333333;" value="&lt;b&gt;Messaging&lt;/b&gt; · CatalogService publicerer, monolitten konsumerer catalog-events (EIP)" vertex="1">
-                    <mxGeometry x="40" y="-50" width="2135" height="40" as="geometry"/>
+                    <mxGeometry height="40" width="2225" x="40" y="-50" as="geometry"/>
                 </mxCell>
-                <mxCell id="cs" parent="1" style="strokeWidth=2;dashed=0;align=center;fontSize=8;shape=rect;fillColor=#c0f5a9;html=1;verticalAlign=top;align=left;spacingLeft=12;spacingTop=6;fontSize=14;" value="&lt;b&gt;CatalogService&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;&lt;i&gt;Message Endpoint · publisher&lt;/i&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;Messaging Gateway: ICatalogEvents&lt;/font&gt;" vertex="1">
-                    <mxGeometry height="520" width="260" x="40" y="40" as="geometry"/>
+                <mxCell id="cs" parent="1" style="strokeWidth=2;dashed=0;align=center;fontSize=8;shape=rect;fillColor=#c0f5a9;html=1;verticalAlign=top;align=left;spacingLeft=12;spacingTop=6;fontSize=14;" value="&lt;b&gt;CatalogService&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;&lt;i&gt;Message Endpoint · publisher&lt;/i&gt;&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="520" width="470" x="-170" y="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="gateway" parent="1" style="shape=trapezoid;perimeter=trapezoidPerimeter;size=0.12;direction=south;html=1;whiteSpace=wrap;fillColor=#e3f2f4;strokeColor=#808080;strokeWidth=1;horizontal=1;fontSize=11;verticalAlign=top;spacingTop=55;" value="&lt;b&gt;Messaging Gateway&lt;/b&gt; · &lt;font face=&quot;Courier New&quot;&gt;ICatalogEvents&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="410" width="144" x="140" y="105" as="geometry"/>
                 </mxCell>
                 <mxCell id="ep-post" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontFamily=Courier New;fontSize=11;align=left;spacingLeft=8;" value="POST /api/catalog-items" vertex="1">
-                    <mxGeometry height="40" width="220" x="55" y="120" as="geometry"/>
-                </mxCell>
-                <mxCell id="port-post" parent="1" style="html=1;strokeWidth=1;dashed=0;align=center;fontSize=8;shape=rect;fillColor=#ffffff;" value="" vertex="1">
-                    <mxGeometry height="16" width="16" x="292" y="132" as="geometry"/>
-                </mxCell>
-                <mxCell id="e-in-post" edge="1" parent="1" source="ep-post" style="html=1;endArrow=none;strokeColor=#82b366;strokeWidth=1;" target="port-post" value="">
-                    <mxGeometry relative="1" as="geometry"/>
+                    <mxGeometry height="40" width="175" x="-119" y="110" as="geometry"/>
                 </mxCell>
                 <mxCell id="ep-put" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontFamily=Courier New;fontSize=11;align=left;spacingLeft=8;" value="PUT /api/catalog-items" vertex="1">
-                    <mxGeometry height="40" width="220" x="55" y="300" as="geometry"/>
-                </mxCell>
-                <mxCell id="port-put" parent="1" style="html=1;strokeWidth=1;dashed=0;align=center;fontSize=8;shape=rect;fillColor=#ffffff;" value="" vertex="1">
-                    <mxGeometry height="16" width="16" x="292" y="312" as="geometry"/>
-                </mxCell>
-                <mxCell id="e-in-put" edge="1" parent="1" source="ep-put" style="html=1;endArrow=none;strokeColor=#82b366;strokeWidth=1;" target="port-put" value="">
-                    <mxGeometry relative="1" as="geometry"/>
+                    <mxGeometry height="40" width="175" x="-119" y="290" as="geometry"/>
                 </mxCell>
                 <mxCell id="ep-del" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontFamily=Courier New;fontSize=11;align=left;spacingLeft=8;" value="DELETE /api/catalog-items/{id}" vertex="1">
-                    <mxGeometry height="40" width="220" x="55" y="460" as="geometry"/>
+                    <mxGeometry height="40" width="175" x="-119" y="450" as="geometry"/>
                 </mxCell>
-                <mxCell id="port-del" parent="1" style="html=1;strokeWidth=1;dashed=0;align=center;fontSize=8;shape=rect;fillColor=#ffffff;" value="" vertex="1">
-                    <mxGeometry height="16" width="16" x="292" y="472" as="geometry"/>
+                <mxCell id="e-in-post" edge="1" parent="1" source="ep-post" style="html=1;endArrow=block;endSize=8;strokeColor=#82b366;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" value="">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="140" y="130" as="targetPoint"/>
+                    </mxGeometry>
                 </mxCell>
-                <mxCell id="e-in-del" edge="1" parent="1" source="ep-del" style="html=1;endArrow=none;strokeColor=#82b366;strokeWidth=1;" target="port-del" value="">
-                    <mxGeometry relative="1" as="geometry"/>
+                <mxCell id="e-in-put" edge="1" parent="1" source="ep-put" style="html=1;endArrow=block;endSize=8;strokeColor=#82b366;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" value="">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="140" y="310" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e-in-del" edge="1" parent="1" source="ep-del" style="html=1;endArrow=block;endSize=8;strokeColor=#82b366;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" value="">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="140" y="470" as="targetPoint"/>
+                    </mxGeometry>
                 </mxCell>
                 <mxCell id="ic-e-created" parent="1" style="strokeWidth=2;dashed=0;align=center;fontSize=8;shape=rect;fontStyle=1;whiteSpace=wrap;html=1;fillColor=#83BEFF;" value="E" vertex="1">
                     <mxGeometry height="22" width="22" x="398" y="-1" as="geometry"/>
@@ -70,17 +70,23 @@
                 <mxCell id="m-deleted" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#83BEFF;strokeWidth=2;align=left;verticalAlign=top;spacingLeft=10;spacingTop=6;fontSize=12;" value="&lt;font face=&quot;Courier New&quot; style=&quot;font-size:10px&quot;&gt;{&lt;br&gt;&amp;nbsp;&amp;nbsp;&quot;eventId&quot;: &quot;e71d…&quot;,&lt;br&gt;&amp;nbsp;&amp;nbsp;&quot;occurredAt&quot;: &quot;2026-10-22T12:30:00Z&quot;,&lt;br&gt;&amp;nbsp;&amp;nbsp;&quot;version&quot;: 3,&lt;br&gt;&amp;nbsp;&amp;nbsp;&quot;id&quot;: 13&lt;br&gt;}&lt;/font&gt;" vertex="1">
                     <mxGeometry height="120" width="330" x="400" y="470" as="geometry"/>
                 </mxCell>
-                <mxCell id="e-post" edge="1" parent="1" source="port-post" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endSize=8;strokeColor=#808080;strokeWidth=2;fontSize=10;fontFamily=Courier New;labelBackgroundColor=#ffffff;entryX=0;entryY=0.35;entryDx=0;entryDy=0;" target="m-created" value="publish">
-                    <mxGeometry relative="1" as="geometry"/>
+                <mxCell id="e-post" edge="1" parent="1" source="gateway" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endSize=8;strokeColor=#808080;strokeWidth=2;fontSize=10;fontFamily=Courier New;labelBackgroundColor=#ffffff;entryX=0;entryY=0.35;entryDx=0;entryDy=0;exitX=0;exitY=0.25;exitDx=0;exitDy=0;" target="m-created" value="">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="308" y="140" as="sourcePoint"/>
+                    </mxGeometry>
                 </mxCell>
-                <mxCell id="e-put" edge="1" parent="1" source="port-put" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endSize=8;strokeColor=#808080;strokeWidth=2;fontSize=10;fontFamily=Courier New;labelBackgroundColor=#ffffff;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="m-updated" value="publish">
-                    <mxGeometry relative="1" as="geometry"/>
+                <mxCell id="e-put" edge="1" parent="1" source="gateway" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endSize=8;strokeColor=#808080;strokeWidth=2;fontSize=10;fontFamily=Courier New;labelBackgroundColor=#ffffff;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" target="m-updated" value="">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="308" y="320" as="sourcePoint"/>
+                    </mxGeometry>
                 </mxCell>
-                <mxCell id="e-del" edge="1" parent="1" source="port-del" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endSize=8;strokeColor=#808080;strokeWidth=2;fontSize=10;fontFamily=Courier New;labelBackgroundColor=#ffffff;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="m-deleted" value="publish">
-                    <mxGeometry relative="1" as="geometry"/>
+                <mxCell id="e-del" edge="1" parent="1" source="gateway" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endSize=8;strokeColor=#808080;strokeWidth=2;fontSize=10;fontFamily=Courier New;labelBackgroundColor=#ffffff;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=0.921;exitY=0.345;exitDx=0;exitDy=0;exitPerimeter=0;" target="m-deleted" value="">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="308" y="480" as="sourcePoint"/>
+                    </mxGeometry>
                 </mxCell>
                 <mxCell id="exchange" parent="1" style="strokeWidth=1;outlineConnect=0;dashed=0;align=center;html=1;fontSize=8;shape=mxgraph.eip.messageChannel;channelColor1=#e6e6e6;channelColor2=#808080;verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;verticalAlign=top;fontSize=12;" value="&lt;b&gt;input channel&lt;/b&gt;&lt;br&gt;exchange (topic) &lt;font face=&quot;Courier New&quot;&gt;&amp;quot;catalog&amp;quot;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;durable · persistent beskeder&lt;/font&gt;" vertex="1">
-                    <mxGeometry x="840" y="270" width="180" height="66" as="geometry"/>
+                    <mxGeometry height="66" width="180" x="840" y="270" as="geometry"/>
                 </mxCell>
                 <mxCell id="e-created-x" edge="1" parent="1" source="m-created" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endSize=8;strokeColor=#808080;strokeWidth=2;fontSize=10;fontFamily=Courier New;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="exchange" value="rk: catalog.item.created">
                     <mxGeometry relative="1" as="geometry"/>
@@ -92,87 +98,57 @@
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="meta" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;align=left;verticalAlign=top;spacingLeft=10;spacingTop=6;fontSize=11;" value="&lt;b&gt;Metadata på alle events&lt;/b&gt;&lt;br&gt;&lt;font face=&quot;Courier New&quot;&gt;eventId&lt;/font&gt; – unikt id til sporing og logning&lt;br&gt;&lt;font face=&quot;Courier New&quot;&gt;occurredAt&lt;/font&gt; – hvornår ændringen skete&lt;br&gt;&lt;font face=&quot;Courier New&quot;&gt;version&lt;/font&gt; – stiger ved hver ændring (deleted = sidste version + 1) → &lt;b&gt;Idempotent Receiver&lt;/b&gt;: consumeren ignorerer version ≤ den gemte, så både dubletter og forkert rækkefølge håndteres&lt;br&gt;&lt;font face=&quot;Courier New&quot;&gt;rk&lt;/font&gt; – routing key, sættes ved publish og bruges af topic exchange&lt;br&gt;&lt;br&gt;&lt;b&gt;Push model&lt;/b&gt; (EIP): eventet bærer hele den nye tilstand, så subscriberen ikke skal kalde CatalogService tilbage." vertex="1">
-                    <mxGeometry height="145" width="690" x="40" y="590" as="geometry"/>
+                    <mxGeometry height="145" width="690" x="50" y="610" as="geometry"/>
                 </mxCell>
-                <mxCell id="legend" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;align=left;verticalAlign=top;spacingLeft=10;spacingTop=6;fontSize=11;" value="&lt;b&gt;EIP-notation&lt;/b&gt;" vertex="1">
-                    <mxGeometry x="760" y="700" width="320" height="330" as="geometry"/>
-                </mxCell>
-                <mxCell id="lg-ep" parent="1" style="strokeWidth=2;dashed=0;align=center;fontSize=8;shape=rect;fillColor=#c0f5a9;html=1;" value="" vertex="1">
-                    <mxGeometry height="20" width="30" x="772" y="728" as="geometry"/>
-                </mxCell>
-                <mxCell id="lg-ep-port" parent="1" style="html=1;strokeWidth=1;dashed=0;align=center;fontSize=8;shape=rect;fillColor=#ffffff;" value="" vertex="1">
-                    <mxGeometry height="12" width="12" x="795" y="732" as="geometry"/>
-                </mxCell>
-                <mxCell id="lg-ep-t" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=11;" value="Message Endpoint" vertex="1">
-                    <mxGeometry height="20" width="250" x="816" y="728" as="geometry"/>
+                <mxCell id="legend" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;align=left;verticalAlign=top;spacingLeft=10;spacingTop=6;fontSize=11;" value="" vertex="1">
+                    <mxGeometry height="318" width="320" x="40" y="790" as="geometry"/>
                 </mxCell>
                 <mxCell id="lg-e" parent="1" style="strokeWidth=2;dashed=0;align=center;fontSize=8;shape=rect;fontStyle=1;whiteSpace=wrap;html=1;fillColor=#83BEFF;" value="E" vertex="1">
-                    <mxGeometry height="20" width="20" x="776" y="755" as="geometry"/>
+                    <mxGeometry height="20" width="20" x="60" y="806" as="geometry"/>
                 </mxCell>
                 <mxCell id="lg-e-t" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=11;" value="Event Message" vertex="1">
-                    <mxGeometry height="20" width="250" x="816" y="755" as="geometry"/>
+                    <mxGeometry height="20" width="250" x="100" y="806" as="geometry"/>
                 </mxCell>
                 <mxCell id="lg-d" parent="1" style="strokeWidth=2;dashed=0;align=center;fontSize=8;shape=rect;fontStyle=1;whiteSpace=wrap;html=1;fillColor=#C7A0FF;" value="D" vertex="1">
-                    <mxGeometry height="20" width="20" x="776" y="780" as="geometry"/>
+                    <mxGeometry height="20" width="20" x="60" y="832" as="geometry"/>
                 </mxCell>
                 <mxCell id="lg-d-t" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=11;" value="Document Message (E + D = push model)" vertex="1">
-                    <mxGeometry height="20" width="250" x="816" y="780" as="geometry"/>
+                    <mxGeometry height="20" width="250" x="100" y="832" as="geometry"/>
                 </mxCell>
                 <mxCell id="lg-ch" parent="1" style="strokeWidth=1;outlineConnect=0;dashed=0;align=center;html=1;fontSize=8;shape=mxgraph.eip.messageChannel;channelColor1=#e6e6e6;channelColor2=#808080;verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;verticalAlign=top;" value="" vertex="1">
-                    <mxGeometry height="14" width="34" x="772" y="804" as="geometry"/>
+                    <mxGeometry height="14" width="34" x="56" y="858" as="geometry"/>
                 </mxCell>
                 <mxCell id="lg-ch-t" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=11;" value="Message Channel (pub-sub)" vertex="1">
-                    <mxGeometry height="20" width="250" x="816" y="802" as="geometry"/>
-                </mxCell>
-                <mxCell id="lg-ed" parent="1" style="fillColor=#c0f5a9;dashed=0;outlineConnect=0;strokeWidth=2;html=1;align=center;fontSize=9;verticalAlign=top;shape=mxgraph.eip.event_driven_consumer;" value="" vertex="1">
-                    <mxGeometry height="22" width="22" x="776" y="828" as="geometry"/>
-                </mxCell>
-                <mxCell id="lg-ed-t" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=11;" value="Event-Driven Consumer" vertex="1">
-                    <mxGeometry height="20" width="250" x="816" y="829" as="geometry"/>
-                </mxCell>
-                <mxCell id="lg-du" parent="1" style="dashed=0;outlineConnect=0;strokeWidth=2;html=1;align=center;fontSize=9;verticalAlign=top;shape=mxgraph.eip.durable_subscriber;fillColor=#a0a0a0;" value="" vertex="1">
-                    <mxGeometry height="22" width="22" x="776" y="856" as="geometry"/>
-                </mxCell>
-                <mxCell id="lg-du-t" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=11;" value="Durable Subscriber" vertex="1">
-                    <mxGeometry height="20" width="250" x="816" y="857" as="geometry"/>
+                    <mxGeometry height="20" width="250" x="100" y="856" as="geometry"/>
                 </mxCell>
                 <mxCell id="lg-inv" parent="1" style="strokeWidth=1;outlineConnect=0;dashed=0;align=center;html=1;shape=mxgraph.eip.messageChannel;channelColor1=#e6e6e6;channelColor2=#808080;verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;verticalAlign=top;fontSize=12;" value="" vertex="1">
-                    <mxGeometry x="772" y="884" width="34" height="14" as="geometry"/>
+                    <mxGeometry height="14" width="34" x="56" y="884" as="geometry"/>
                 </mxCell>
                 <mxCell id="lg-inv-warn" parent="1" style="triangle;direction=north;html=1;fillColor=#ffff00;strokeColor=#808080;fontSize=9;fontStyle=1;verticalAlign=bottom;spacingBottom=-2;" value="" vertex="1">
-                    <mxGeometry x="812" y="882" width="14" height="13" as="geometry"/>
+                    <mxGeometry height="13" width="14" x="96" y="882" as="geometry"/>
                 </mxCell>
                 <mxCell id="lg-inv-t" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=11;" value="Invalid Message Channel" vertex="1">
-                    <mxGeometry x="832" y="882" width="240" height="20" as="geometry"/>
-                </mxCell>
-                <mxCell id="lg-dlq-t" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=10;fontColor=#555555;" value="Stiplet ramme = EIP-rolle, der spænder over flere RabbitMQ-dele" vertex="1">
-                    <mxGeometry x="776" y="1005" width="290" height="20" as="geometry"/>
+                    <mxGeometry height="20" width="240" x="116" y="882" as="geometry"/>
                 </mxCell>
                 <mxCell id="frame-pubsub" parent="1" style="rounded=1;arcSize=3;whiteSpace=wrap;html=1;fillColor=none;dashed=1;dashPattern=8 4;strokeColor=#6c8ebf;strokeWidth=2;verticalAlign=top;align=left;spacingLeft=10;spacingTop=2;fontSize=12;fontColor=#6c8ebf;" value="&lt;b&gt;Publish-Subscribe Channel&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;én input channel splittes i én output channel pr. subscriber; hver får sin egen kopi&lt;/font&gt;" vertex="1">
-                    <mxGeometry x="820" y="190" width="545" height="490" as="geometry"/>
+                    <mxGeometry height="490" width="545" x="820" y="190" as="geometry"/>
                 </mxCell>
                 <mxCell id="q-monolith" parent="1" style="strokeWidth=1;outlineConnect=0;dashed=0;align=center;html=1;fontSize=8;shape=mxgraph.eip.messageChannel;channelColor1=#e6e6e6;channelColor2=#808080;verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;verticalAlign=top;fontSize=12;" value="&lt;b&gt;output channel&lt;/b&gt;&lt;br&gt;queue &lt;font face=&quot;Courier New&quot;&gt;&amp;quot;monolith.catalog&amp;quot;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;binding catalog.item.* · durable · volume&lt;/font&gt;" vertex="1">
-                    <mxGeometry x="1160" y="270" width="190" height="66" as="geometry"/>
+                    <mxGeometry height="66" width="190" x="1160" y="270" as="geometry"/>
                 </mxCell>
-                <mxCell id="ic-du-queue" parent="1" style="dashed=0;outlineConnect=0;strokeWidth=2;html=1;align=center;fontSize=9;verticalAlign=top;shape=mxgraph.eip.durable_subscriber;fillColor=#a0a0a0;" value="" vertex="1">
-                    <mxGeometry x="1160" y="236" width="22" height="22" as="geometry"/>
-                </mxCell>
-                <mxCell id="lbl-du-queue" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=11;" value="&lt;b&gt;Durable Subscriber&lt;/b&gt;" vertex="1">
-                    <mxGeometry x="1188" y="236" width="170" height="22" as="geometry"/>
-                </mxCell>
-                <mxCell id="e-binding" edge="1" parent="1" source="exchange" target="q-monolith" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endSize=8;strokeColor=#808080;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" value="">
+                <mxCell id="e-binding" edge="1" parent="1" source="exchange" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endSize=8;strokeColor=#808080;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="q-monolith" value="">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="copy-mono-dot" parent="1" style="ellipse;html=1;fillColor=#808080;strokeColor=none;" value="" vertex="1">
-                    <mxGeometry x="1095" y="276" width="10" height="10" as="geometry"/>
+                    <mxGeometry height="10" width="10" x="1095" y="276" as="geometry"/>
                 </mxCell>
                 <mxCell id="copy-mono-msg" parent="1" style="rounded=0;html=1;fillColor=#99CC00;strokeColor=#669900;strokeWidth=1;" value="" vertex="1">
-                    <mxGeometry x="1105" y="286" width="12" height="12" as="geometry"/>
+                    <mxGeometry height="12" width="12" x="1105" y="286" as="geometry"/>
                 </mxCell>
                 <mxCell id="q-future" parent="1" style="strokeWidth=1;outlineConnect=0;dashed=1;align=center;html=1;shape=mxgraph.eip.messageChannel;channelColor1=#e6e6e6;channelColor2=#808080;verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;verticalAlign=top;fontSize=12;" value="&lt;b&gt;output channel&lt;/b&gt;&lt;br&gt;queue &lt;font face=&quot;Courier New&quot;&gt;&amp;quot;&amp;lt;service&amp;gt;.catalog&amp;quot;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;egen binding · egen kopi&lt;/font&gt;" vertex="1">
-                    <mxGeometry x="1160" y="560" width="190" height="66" as="geometry"/>
+                    <mxGeometry height="66" width="190" x="1160" y="560" as="geometry"/>
                 </mxCell>
-                <mxCell id="e-binding-future" edge="1" parent="1" source="exchange" target="q-future" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endSize=8;strokeColor=#808080;strokeWidth=2;dashed=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" value="">
+                <mxCell id="e-binding-future" edge="1" parent="1" source="exchange" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endSize=8;strokeColor=#808080;strokeWidth=2;dashed=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="q-future" value="">
                     <mxGeometry relative="1" as="geometry">
                         <Array as="points">
                             <mxPoint x="1060" y="303"/>
@@ -181,76 +157,190 @@
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="copy-future-dot" parent="1" style="ellipse;html=1;fillColor=#808080;strokeColor=none;" value="" vertex="1">
-                    <mxGeometry x="1095" y="566" width="10" height="10" as="geometry"/>
+                    <mxGeometry height="10" width="10" x="1095" y="566" as="geometry"/>
                 </mxCell>
                 <mxCell id="copy-future-msg" parent="1" style="rounded=0;html=1;fillColor=#99CC00;strokeColor=#669900;strokeWidth=1;" value="" vertex="1">
-                    <mxGeometry x="1105" y="576" width="12" height="12" as="geometry"/>
+                    <mxGeometry height="12" width="12" x="1105" y="576" as="geometry"/>
                 </mxCell>
                 <mxCell id="sub-future" parent="1" style="strokeWidth=2;dashed=1;shape=rect;fillColor=#ffffff;strokeColor=#82b366;html=1;whiteSpace=wrap;verticalAlign=middle;align=left;spacingLeft=12;fontSize=13;" value="&lt;b&gt;Fremtidig service&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;&lt;i&gt;subscriber&lt;/i&gt; · binder sin egen kø&lt;/font&gt;" vertex="1">
-                    <mxGeometry x="1400" y="568" width="300" height="50" as="geometry"/>
+                    <mxGeometry height="50" width="300" x="1490" y="568" as="geometry"/>
                 </mxCell>
-                <mxCell id="e-future-sub" edge="1" parent="1" source="q-future" target="sub-future" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endSize=8;strokeColor=#808080;strokeWidth=2;dashed=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" value="">
-                    <mxGeometry relative="1" as="geometry"/>
-                </mxCell>
-                <mxCell id="mono" parent="1" style="strokeWidth=2;dashed=0;align=center;fontSize=8;shape=rect;fillColor=#c0f5a9;html=1;verticalAlign=top;align=left;spacingLeft=12;spacingTop=6;fontSize=14;" value="&lt;b&gt;Monolit · PublicApi&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;&lt;i&gt;Message Endpoint · consumer&lt;/i&gt;&lt;/font&gt;" vertex="1">
-                    <mxGeometry height="520" width="300" x="1400" y="40" as="geometry"/>
-                </mxCell>
-                <mxCell id="e-push" edge="1" parent="1" source="q-monolith" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endSize=8;strokeColor=#808080;strokeWidth=2;fontSize=10;fontFamily=Courier New;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="mono" value="push">
-                    <mxGeometry relative="1" x="-0.2698" as="geometry">
-                        <mxPoint x="1385" y="303" as="targetPoint"/>
+                <mxCell id="e-future-sub" edge="1" parent="1" source="q-future" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endSize=8;strokeColor=#808080;strokeWidth=2;dashed=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" value="">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1482" y="593" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="sync" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#808080;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontSize=11;" value="&lt;b&gt;CatalogSyncConsumer&lt;/b&gt;&lt;br&gt;&lt;i&gt;BackgroundService · Event-Driven Consumer&lt;/i&gt;&lt;br&gt;&lt;br&gt;1. find item (inkl. slettede)&lt;br&gt;2. version ≤ gemt → ignorér&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;(&lt;b&gt;Idempotent Receiver&lt;/b&gt;)&lt;br&gt;3. created / updated → opret eller overskriv&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;deleted → IsDeleted (tombstone)&lt;br&gt;4. gem → &lt;b&gt;ack&lt;/b&gt;&lt;br&gt;&lt;br&gt;ugyldig (JSON, item, routing key) →&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;b&gt;Invalid Message Channel&lt;/b&gt; + ack&lt;br&gt;anden fejl → nack → én genlevering; fejler&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;igen → &lt;b&gt;Invalid Message Channel&lt;/b&gt;&lt;br&gt;&lt;br&gt;Replicas deler køen (&lt;b&gt;Competing Consumers&lt;/b&gt;)" vertex="1">
-                    <mxGeometry height="250" width="255" x="1430" y="170" as="geometry"/>
+                <mxCell id="mono" parent="1" style="strokeWidth=2;dashed=0;align=center;fontSize=8;shape=rect;fillColor=#c0f5a9;html=1;verticalAlign=top;align=left;spacingLeft=12;spacingTop=6;fontSize=14;" value="&lt;b&gt;Monolit · PublicApi&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;&lt;i&gt;Message Endpoint · consumer&lt;/i&gt;&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="520" width="300" x="1490" y="40" as="geometry"/>
                 </mxCell>
-                <mxCell id="q-invalid" parent="1" style="strokeWidth=1;outlineConnect=0;dashed=0;align=center;html=1;shape=mxgraph.eip.messageChannel;channelColor1=#e6e6e6;channelColor2=#808080;verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;verticalAlign=top;fontSize=12;spacingTop=20;" value="&lt;b&gt;Invalid Message Channel&lt;/b&gt;&lt;br&gt;queue &lt;font face=&quot;Courier New&quot;&gt;&amp;quot;monolith.catalog.invalid&amp;quot;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;consumerens afgørelse: ugyldig eller fejler 2. gang&lt;br&gt;via default exchange · durable&lt;/font&gt;" vertex="1">
-                    <mxGeometry x="1765" y="400" width="150" height="30" as="geometry"/>
+                <mxCell id="e-push" edge="1" parent="1" source="q-monolith" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endSize=8;strokeColor=#808080;strokeWidth=2;fontSize=10;fontFamily=Courier New;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="sync" value="">
+                    <mxGeometry relative="1" x="-0.2584" as="geometry">
+                        <mxPoint x="1482" y="303" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="sync" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#808080;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontSize=11;" value="&lt;b&gt;CatalogSyncConsumer&lt;/b&gt;&lt;br&gt;&lt;i&gt;BackgroundService · Event-Driven Consumer&lt;br&gt;Service Activator&lt;/i&gt;&lt;br&gt;&lt;br&gt;1. find item (inkl. slettede)&lt;br&gt;2. version ≤ gemt → ignorér&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;(&lt;b&gt;Idempotent Receiver&lt;/b&gt;)&lt;br&gt;3. created / updated → opret eller overskriv&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;deleted → IsDeleted (tombstone)&lt;br&gt;4. gem → &lt;b&gt;ack&lt;/b&gt;&lt;br&gt;&lt;br&gt;ugyldig (JSON, item, routing key) →&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;b&gt;Invalid Message Channel&lt;/b&gt; + ack&lt;br&gt;anden fejl → nack → én genlevering; fejler&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;igen → &lt;b&gt;Invalid Message Channel&lt;/b&gt;&lt;br&gt;&lt;br&gt;Replicas deler køen (&lt;b&gt;Competing Consumers&lt;/b&gt;)" vertex="1">
+                    <mxGeometry height="272" width="255" x="1520" y="170" as="geometry"/>
+                </mxCell>
+                <mxCell id="q-invalid" parent="1" style="strokeWidth=1;outlineConnect=0;dashed=0;align=center;html=1;shape=mxgraph.eip.messageChannel;channelColor1=#e6e6e6;channelColor2=#808080;verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;verticalAlign=top;fontSize=12;spacingTop=20;" value="&lt;b&gt;Invalid Message Channel&lt;/b&gt;&lt;br&gt;&lt;i&gt;Point-to-Point Channel&lt;/i&gt;&lt;br&gt;queue &lt;font face=&quot;Courier New&quot;&gt;&amp;quot;monolith.catalog.invalid&amp;quot;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;consumerens afgørelse: ugyldig eller fejler 2. gang&lt;br&gt;via default exchange · durable&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="30" width="150" x="1855" y="400" as="geometry"/>
                 </mxCell>
                 <mxCell id="inv-warn" parent="1" style="triangle;direction=north;html=1;fillColor=#ffff00;strokeColor=#808080;fontSize=9;fontStyle=1;verticalAlign=bottom;spacingBottom=-2;" value="!" vertex="1">
-                    <mxGeometry x="1831" y="432" width="18" height="16" as="geometry"/>
+                    <mxGeometry height="16" width="18" x="1921" y="432" as="geometry"/>
                 </mxCell>
                 <mxCell id="inv-copy-dot" parent="1" style="ellipse;html=1;fillColor=#808080;strokeColor=none;" value="" vertex="1">
-                    <mxGeometry x="1715" y="386" width="10" height="10" as="geometry"/>
+                    <mxGeometry height="10" width="10" x="1819" y="378" as="geometry"/>
                 </mxCell>
                 <mxCell id="inv-copy-msg" parent="1" style="rounded=0;html=1;fillColor=#b0dde4;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=10;align=center;verticalAlign=middle;" value="?" vertex="1">
-                    <mxGeometry x="1725" y="396" width="12" height="12" as="geometry"/>
+                    <mxGeometry height="12" width="12" x="1829" y="388" as="geometry"/>
                 </mxCell>
-                <mxCell id="e-invalid" edge="1" parent="1" source="sync" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endSize=8;strokeColor=#b85450;strokeWidth=2;fontSize=10;fontFamily=Courier New;labelBackgroundColor=#ffffff;exitX=1;exitY=0.98;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="q-invalid" value="">
-                    <mxGeometry relative="1" as="geometry"/>
+                <mxCell id="e-invalid" edge="1" parent="1" source="sync" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endSize=8;strokeColor=#b85450;strokeWidth=2;fontSize=10;fontFamily=Courier New;labelBackgroundColor=#ffffff;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="q-invalid" value="">
+                    <mxGeometry relative="1" x="0.4182" as="geometry"/>
                 </mxCell>
                 <mxCell id="mono-db" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#ffffff;strokeColor=#808080;fontSize=11;" value="&lt;b&gt;SQL Server&lt;/b&gt;&lt;br&gt;Catalog (read-only kopi)&lt;br&gt;&lt;font face=&quot;Courier New&quot; style=&quot;font-size:10px&quot;&gt;Version · IsDeleted&lt;/font&gt;" vertex="1">
-                    <mxGeometry height="95" width="165" x="1475" y="440" as="geometry"/>
+                    <mxGeometry height="85" width="165" x="1565" y="462" as="geometry"/>
                 </mxCell>
                 <mxCell id="e-sync-db" edge="1" parent="1" source="sync" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endSize=8;strokeColor=#808080;strokeWidth=2;fontSize=10;fontFamily=Courier New;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" target="mono-db" value="Add / Update">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-            
                 <mxCell id="lg-copy-dot" parent="1" style="ellipse;html=1;fillColor=#808080;strokeColor=none;" value="" vertex="1">
-                    <mxGeometry x="776" y="935" width="10" height="10" as="geometry"/>
+                    <mxGeometry height="10" width="10" x="56" y="908" as="geometry"/>
                 </mxCell>
                 <mxCell id="lg-copy-msg" parent="1" style="rounded=0;html=1;fillColor=#99CC00;strokeColor=#669900;strokeWidth=1;" value="" vertex="1">
-                    <mxGeometry x="786" y="945" width="12" height="12" as="geometry"/>
+                    <mxGeometry height="12" width="12" x="66" y="918" as="geometry"/>
                 </mxCell>
                 <mxCell id="lg-copy-t" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=11;" value="Message (en kopi pr. output channel)" vertex="1">
-                    <mxGeometry x="816" y="937" width="250" height="20" as="geometry"/>
+                    <mxGeometry height="20" width="250" x="96" y="908" as="geometry"/>
                 </mxCell>
-            
-            
                 <mxCell id="lg-unknown-dot" parent="1" style="ellipse;html=1;fillColor=#808080;strokeColor=none;" value="" vertex="1">
-                    <mxGeometry x="776" y="956" width="10" height="10" as="geometry"/>
+                    <mxGeometry height="10" width="10" x="56" y="930" as="geometry"/>
                 </mxCell>
                 <mxCell id="lg-unknown-msg" parent="1" style="rounded=0;html=1;fillColor=#b0dde4;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=10;align=center;verticalAlign=middle;" value="?" vertex="1">
-                    <mxGeometry x="786" y="966" width="12" height="12" as="geometry"/>
+                    <mxGeometry height="12" width="12" x="66" y="940" as="geometry"/>
                 </mxCell>
                 <mxCell id="lg-unknown-t" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=11;" value="Ugyldig besked / fejlet 2. gang" vertex="1">
-                    <mxGeometry x="816" y="960" width="250" height="20" as="geometry"/>
+                    <mxGeometry height="20" width="250" x="96" y="934" as="geometry"/>
                 </mxCell>
-
                 <mxCell id="inv-consumer" parent="1" style="strokeWidth=2;dashed=0;shape=rect;fillColor=#c0f5a9;html=1;whiteSpace=wrap;verticalAlign=middle;align=left;spacingLeft=10;fontSize=13;" value="&lt;b&gt;InvalidMessageConsumer&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;&lt;i&gt;Message Endpoint · konsol-app&lt;/i&gt;&lt;br&gt;printer body · autoAck&lt;/font&gt;" vertex="1">
-                    <mxGeometry x="1975" y="385" width="200" height="60" as="geometry"/>
+                    <mxGeometry height="60" width="200" x="2065" y="385" as="geometry"/>
                 </mxCell>
-                <mxCell id="e-inv-consumer" edge="1" parent="1" source="q-invalid" target="inv-consumer" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endSize=8;strokeColor=#808080;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" value="">
+                <mxCell id="e-inv-consumer" edge="1" parent="1" source="q-invalid" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endSize=8;strokeColor=#808080;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="inv-consumer" value="">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="2057" y="415" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="lg-gw" parent="1" style="shape=trapezoid;perimeter=trapezoidPerimeter;size=0.15;direction=south;html=1;fillColor=#e3f2f4;strokeColor=#808080;" value="" vertex="1">
+                    <mxGeometry height="20" width="24" x="60" y="960" as="geometry"/>
+                </mxCell>
+                <mxCell id="lg-gw-t" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=11;" value="Messaging Gateway (skjuler messaging for endpoints)" vertex="1">
+                    <mxGeometry height="20" width="260" x="96" y="960" as="geometry"/>
+                </mxCell>
+                <mxCell id="SVSA1rARKuf-fKuYIZz7-2" edge="1" parent="1" source="ep-del" style="html=1;endArrow=none;strokeColor=#82b366;strokeWidth=1;entryX=0.916;entryY=1.042;entryDx=0;entryDy=0;entryPerimeter=0;" value="">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="56" y="470" as="sourcePoint"/>
+                        <mxPoint x="64.15200000000004" y="470.5600000000002" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="SVSA1rARKuf-fKuYIZz7-7" edge="1" parent="1" style="html=1;endArrow=none;strokeColor=#82b366;strokeWidth=1;" value="">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="300" y="140.00000000000045" as="sourcePoint"/>
+                        <mxPoint x="292" y="140.00000000000023" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="cs-map-mapper" parent="1" style="rounded=1;html=1;whiteSpace=wrap;fillColor=#bde0e3;strokeColor=#808080;fontSize=10;" value="&lt;b&gt;Messaging Mapper&lt;/b&gt;&lt;br&gt;&lt;font face=&quot;Courier New&quot;&gt;ToData&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="32" width="124" x="150" y="215" as="geometry"/>
+                </mxCell>
+                <mxCell id="cs-map-msg" parent="1" style="rounded=0;html=1;whiteSpace=wrap;fillColor=#ffffff;strokeColor=#808080;fontSize=9;fontFamily=Courier New;" value="JSON" vertex="1">
+                    <mxGeometry height="32" width="50" x="222" y="262" as="geometry"/>
+                </mxCell>
+                <mxCell id="cs-map-obj" parent="1" style="shape=cube;size=8;html=1;whiteSpace=wrap;fillColor=#bde0e3;strokeColor=#808080;fontSize=9;fontFamily=Courier New;" value="Catalog&lt;br&gt;Item" vertex="1">
+                    <mxGeometry height="32" width="50" x="152" y="262" as="geometry"/>
+                </mxCell>
+                <mxCell id="cs-map-e-msg" edge="1" parent="1" source="cs-map-mapper" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=0;endSize=7;strokeColor=#333333;strokeWidth=1;exitY=1;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="cs-map-msg" value="">
                     <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="cs-map-e-obj" edge="1" parent="1" source="cs-map-mapper" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=0;endSize=7;strokeColor=#333333;strokeWidth=1;exitY=1;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="cs-map-obj" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="mono-map-mapper" parent="1" style="rounded=1;html=1;whiteSpace=wrap;fillColor=#bde0e3;strokeColor=#808080;fontSize=10;" value="&lt;b&gt;Messaging Mapper&lt;/b&gt;&lt;br&gt;&lt;font face=&quot;Courier New&quot;&gt;FromCatalogService&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="32" width="130" x="1598" y="92" as="geometry"/>
+                </mxCell>
+                <mxCell id="mono-map-msg" parent="1" style="rounded=0;html=1;whiteSpace=wrap;fillColor=#ffffff;strokeColor=#808080;fontSize=9;fontFamily=Courier New;" value="JSON" vertex="1">
+                    <mxGeometry height="32" width="50" x="1543" y="134" as="geometry"/>
+                </mxCell>
+                <mxCell id="mono-map-obj" parent="1" style="shape=cube;size=8;html=1;whiteSpace=wrap;fillColor=#bde0e3;strokeColor=#808080;fontSize=9;fontFamily=Courier New;" value="Catalog&lt;br&gt;Item" vertex="1">
+                    <mxGeometry height="32" width="50" x="1733" y="134" as="geometry"/>
+                </mxCell>
+                <mxCell id="mono-map-e-msg" edge="1" parent="1" source="mono-map-mapper" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=0;endSize=7;strokeColor=#333333;strokeWidth=1;exitY=1;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="mono-map-msg" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="mono-map-e-obj" edge="1" parent="1" source="mono-map-mapper" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=0;endSize=7;strokeColor=#333333;strokeWidth=1;exitY=1;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="mono-map-obj" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="lg-map" parent="1" style="rounded=1;html=1;fillColor=#bde0e3;strokeColor=#808080;" value="" vertex="1">
+                    <mxGeometry height="8" width="16" x="64" y="986" as="geometry"/>
+                </mxCell>
+                <mxCell id="lg-map-msg" parent="1" style="rounded=0;html=1;fillColor=#ffffff;strokeColor=#808080;" value="" vertex="1">
+                    <mxGeometry height="8" width="8" x="58" y="998" as="geometry"/>
+                </mxCell>
+                <mxCell id="lg-map-obj" parent="1" style="shape=cube;size=3;html=1;fillColor=#bde0e3;strokeColor=#808080;" value="" vertex="1">
+                    <mxGeometry height="8" width="8" x="78" y="998" as="geometry"/>
+                </mxCell>
+                <mxCell id="lg-map-t" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=11;" value="Messaging Mapper (besked ↔ domæneobjekt)" vertex="1">
+                    <mxGeometry height="20" width="260" x="96" y="988" as="geometry"/>
+                </mxCell>
+                <mxCell id="sync-edc" parent="1" style="rounded=0;html=1;fillColor=#c0f5a9;strokeColor=#000000;strokeWidth=1;" value="" vertex="1">
+                    <mxGeometry height="20" width="30" x="1700" y="412" as="geometry"/>
+                </mxCell>
+                <mxCell id="sync-edc-a" parent="1" style="triangle;html=1;fillColor=#808080;strokeColor=none;" value="" vertex="1">
+                    <mxGeometry height="10" width="8" x="1702" y="417" as="geometry"/>
+                </mxCell>
+                <mxCell id="sync-edc-b" parent="1" style="rhombus;html=1;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
+                    <mxGeometry height="7" width="7" x="1720" y="418" as="geometry"/>
+                </mxCell>
+                <mxCell id="sync-edc-e" edge="1" parent="1" source="sync-edc-a" target="sync-edc-b" style="html=1;endArrow=block;endSize=3;strokeColor=#000000;strokeWidth=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="sync-sa" parent="1" style="rounded=0;html=1;fillColor=#c0f5a9;strokeColor=#000000;strokeWidth=1;" value="" vertex="1">
+                    <mxGeometry height="20" width="30" x="1738" y="412" as="geometry"/>
+                </mxCell>
+                <mxCell id="sync-sa-a" parent="1" style="rhombus;html=1;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
+                    <mxGeometry height="7" width="7" x="1741" y="418" as="geometry"/>
+                </mxCell>
+                <mxCell id="sync-sa-b" parent="1" style="rhombus;html=1;fillColor=#ffffff;strokeColor=#000000;" value="" vertex="1">
+                    <mxGeometry height="7" width="7" x="1758" y="418" as="geometry"/>
+                </mxCell>
+                <mxCell id="sync-sa-e" edge="1" parent="1" source="sync-sa-a" target="sync-sa-b" style="html=1;endArrow=block;endSize=3;strokeColor=#000000;strokeWidth=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="lg-edc" parent="1" style="rounded=0;html=1;fillColor=#c0f5a9;strokeColor=#000000;strokeWidth=1;" value="" vertex="1">
+                    <mxGeometry height="18" width="26" x="56" y="1014" as="geometry"/>
+                </mxCell>
+                <mxCell id="lg-edc-a" parent="1" style="triangle;html=1;fillColor=#808080;strokeColor=none;" value="" vertex="1">
+                    <mxGeometry height="10" width="8" x="58" y="1018" as="geometry"/>
+                </mxCell>
+                <mxCell id="lg-edc-b" parent="1" style="rhombus;html=1;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
+                    <mxGeometry height="7" width="7" x="72" y="1019" as="geometry"/>
+                </mxCell>
+                <mxCell id="lg-edc-e" edge="1" parent="1" source="lg-edc-a" target="lg-edc-b" style="html=1;endArrow=block;endSize=3;strokeColor=#000000;strokeWidth=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="lg-sa" parent="1" style="rounded=0;html=1;fillColor=#c0f5a9;strokeColor=#000000;strokeWidth=1;" value="" vertex="1">
+                    <mxGeometry height="18" width="26" x="56" y="1040" as="geometry"/>
+                </mxCell>
+                <mxCell id="lg-sa-a" parent="1" style="rhombus;html=1;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
+                    <mxGeometry height="7" width="7" x="59" y="1045" as="geometry"/>
+                </mxCell>
+                <mxCell id="lg-sa-b" parent="1" style="rhombus;html=1;fillColor=#ffffff;strokeColor=#000000;" value="" vertex="1">
+                    <mxGeometry height="7" width="7" x="72" y="1045" as="geometry"/>
+                </mxCell>
+                <mxCell id="lg-sa-e" edge="1" parent="1" source="lg-sa-a" target="lg-sa-b" style="html=1;endArrow=block;endSize=3;strokeColor=#000000;strokeWidth=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="lg-edc-t" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=11;" value="Event-Driven Consumer" vertex="1">
+                    <mxGeometry height="20" width="260" x="96" y="1013" as="geometry"/>
+                </mxCell>
+                <mxCell id="lg-sa-t" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=11;" value="Service Activator (kalder servicen)" vertex="1">
+                    <mxGeometry height="20" width="260" x="96" y="1039" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>

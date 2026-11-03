@@ -174,6 +174,13 @@ Ny service: `services/<Service>/` med samme struktur + `<service>.yml`, der kald
 - Kø navngivet efter service, ikke instans → monolitten er *én* subscriber uanset replicas
 - CatalogService kender ikke sine subscribers; ny service binder bare sin egen kø (i dag kun 1 subscriber)
 - Routing keys `catalog.item.created/updated/deleted`; binding `catalog.item.*`
+- Exchange-type **topic** (bindings med mønstre: `*` = ét ord, `#` = nul eller flere):
+  - Med 1 subscriber, der vil have alt, løser fanout og direct det samme → topic er valgt for fremtidige subscribers
+  - Subscriber vælger selv via binding, publisher ændres ikke: fx kun `catalog.item.updated`, eller `catalog.#` hvis der kommer `catalog.brand.*`
+  - vs. fanout: alle får alt og må selv filtrere. vs. direct: én binding pr. eksakt key, ny eventtype kræver nye bindings hos alle
+  - Topic dækker begge: binding uden wildcard = direct, `#` = fanout
+  - Bagside: ny key som `catalog.item.priceChanged` rammer `catalog.item.*`, men monolitten kender den ikke → invalid-køen (opdages, går ikke tabt)
+  - Fanout ignorerer routing key ved routing, men den leveres stadig → ikke et argument for topic
 - Kode: `RabbitMq.cs` (`ExchangeDeclareAsync`), `CatalogSyncConsumer.cs` (`QueueDeclareAsync`, `QueueBindAsync`)
 
 **Guaranteed Delivery**
@@ -188,6 +195,7 @@ Ny service: `services/<Service>/` med samme struktur + `<service>.yml`, der kald
 - Tilfælde: ugyldig JSON, tom besked, ukendt routing key, `item` mangler på `created`/`updated` → flyttes med det samme (aldrig retry)
 - Tjek før databasen → `InvalidMessageException`
 - Fejl under behandling (fx SQL Server nede): én genlevering (`requeue: true`), fejler den igen (`Redelivered`) → også invalid i stedet for at gå tabt
+- Kanalen er en **Point-to-Point Channel**: én kø uden binding, kun én modtager får hver besked (`InvalidMessageConsumer`)
 - Flytning: publish uændret via default exchange til `monolith.catalog.invalid` → ack original (publish før ack: hellere to gange end tabt). Fejl logges i monolitten
 - `services/InvalidMessageConsumer`: konsol-app, printer beskederne (autoAck). Kører som monitor i Docker: `docker compose logs -f invalidmessageconsumer`; lokalt `dotnet run`
 - Kode: `CatalogSyncConsumer.cs` (`HandleMessage`, `catch ... InvalidMessageException || Redelivered`), `services/InvalidMessageConsumer/Program.cs`
@@ -223,6 +231,8 @@ Ny service: `services/<Service>/` med samme struktur + `<service>.yml`, der kald
 - *Definition:* klasse, der skjuler messaging bag domænemetoder
 - `ICatalogEvents.CatalogItemCreated(item)` osv.; endpoints kender ikke RabbitMQ, routing keys eller JSON
 - Udskiftelig: integrationstests bruger `Mock.Of<ICatalogEvents>()`
+- vs. **Channel Adapter** *(ikke brugt)*: Adapter kobler appen til messaging udefra via dens API eller data (fx CDC/Debezium på databasen); Gateway ligger i appens egen kode → vi har kildekoden til både CatalogService og monolitten og kan ændre den direkte
+- Kun i CatalogService: i monolitten er messaging isoleret i `CatalogSyncConsumer`, men der er intet domæneinterface, som monolitten kalder → Event-Driven Consumer + Messaging Mapper + Service Activator, ikke gateway
 - Kode: `Interfaces/ICatalogEvents.cs`, `Messaging/CatalogEvents.cs`, `tests/CatalogService.IntegrationTests/CatalogServiceFactory.cs`
 
 **Messaging Mapper**
@@ -236,6 +246,12 @@ Ny service: `services/<Service>/` med samme struktur + `<service>.yml`, der kald
 - *Definition:* får beskeder leveret automatisk (vs. Polling Consumer, der selv spørger)
 - `BackgroundService` + `AsyncEventingBasicConsumer`; RabbitMQ pusher → `ReceivedAsync`
 - Kode: `CatalogSyncConsumer.cs` (`ReceivedAsync`)
+
+**Service Activator**
+- *Definition:* forbinder beskeder på en kanal med en service, der også kan kaldes uden messaging; kalder den som en hvilken som helst anden klient (kan være et simpelt metodekald)
+- Envejs (ingen Request-Reply): besked → `IRepository<CatalogItem>` + `CatalogItem.FromCatalogService` / `SyncFromCatalogService`
+- Repository og entitet kender ikke RabbitMQ; samme repository bruges af resten af monolitten
+- Kode: `CatalogSyncConsumer.cs` (`HandleMessage`)
 
 **Durable Subscriber**
 - *Definition:* Pub-Sub-subscriber, hvis beskeder gemmes, mens den er afkoblet
