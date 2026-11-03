@@ -45,7 +45,10 @@ services:
       context: .
       dockerfile: services/CatalogService/CatalogService.Api/Dockerfile
     depends_on:
-      - "catalogdb"
+      catalogdb:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
     restart: on-failure
   catalogdb:
     image: postgres:17
@@ -55,7 +58,23 @@ services:
       - POSTGRES_DB=catalogdb
     ports:
       - "5433:5432"
+  rabbitmq:
+    image: rabbitmq:4-management
+    # Durable køer og persistent beskeder skrives til disk. Uden en volume ligger den disk i containeren
+    # og slettes, når containeren genskabes, så beskeder, der venter på en consumer, går tabt.
+    # Fast hostname, fordi RabbitMQ gemmer sine data i en mappe opkaldt efter værtsnavnet.
+    hostname: rabbitmq
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=catalog
+      - RABBITMQ_DEFAULT_PASS=catalogpassword
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
-    
-
+volumes:
+  rabbitmq-data:
 

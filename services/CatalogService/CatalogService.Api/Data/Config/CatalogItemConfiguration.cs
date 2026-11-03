@@ -25,6 +25,9 @@ public class CatalogItemConfiguration : IEntityTypeConfiguration<CatalogItem>
         builder.Property(ci => ci.PictureUri)
             .IsRequired(false);
 
+        builder.Property(ci => ci.Version)
+            .IsConcurrencyToken();
+
         builder.HasOne(ci => ci.CatalogBrand)
             .WithMany()
             .HasForeignKey(ci => ci.CatalogBrandId);

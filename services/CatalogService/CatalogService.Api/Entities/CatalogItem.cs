@@ -14,6 +14,7 @@ public class CatalogItem : BaseEntity, IAggregateRoot
     public CatalogType? CatalogType { get; private set; }
     public int CatalogBrandId { get; private set; }
     public CatalogBrand? CatalogBrand { get; private set; }
+    public int Version { get; private set; } = 1;
 
     public CatalogItem(int catalogTypeId,
         int catalogBrandId,
@@ -51,6 +52,11 @@ public class CatalogItem : BaseEntity, IAggregateRoot
     {
         Guard.Against.Zero(catalogTypeId, nameof(catalogTypeId));
         CatalogTypeId = catalogTypeId;
+    }
+
+    public void IncrementVersion()
+    {
+        Version++;
     }
 
     public void UpdatePictureUri(string pictureName)

@@ -25,3 +25,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Docker
     ports:
       - "5400:8080"
+ rabbitmq:
+   ports:
+     - "5673:5672"
+     - "15673:15672"

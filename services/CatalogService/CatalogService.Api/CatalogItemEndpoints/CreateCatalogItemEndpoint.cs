@@ -20,10 +20,12 @@ namespace CatalogService.Api.CatalogItemEndpoints;
 public class CreateCatalogItemEndpoint : IEndpoint<IResult, CreateCatalogItemRequest, IRepository<CatalogItem>>
 {
     private readonly IUriComposer _uriComposer;
+    private readonly ICatalogEvents _catalogEvents;
 
-    public CreateCatalogItemEndpoint(IUriComposer uriComposer)
+    public CreateCatalogItemEndpoint(IUriComposer uriComposer, ICatalogEvents catalogEvents)
     {
         _uriComposer = uriComposer;
+        _catalogEvents = catalogEvents;
     }
 
     public void AddRoute(IEndpointRouteBuilder app)
@@ -61,6 +63,8 @@ public class CreateCatalogItemEndpoint : IEndpoint<IResult, CreateCatalogItemReq
             newItem.UpdatePictureUri("eCatalog-item-default.png");
             await itemRepository.UpdateAsync(newItem);
         }
+
+        await _catalogEvents.CatalogItemCreated(newItem);
 
         var dto = new CatalogItemDto
         {

@@ -64,9 +64,15 @@ For at tjekke kig i `services/CatalogService/*`
 <tr>
 <td>Asynkron beskedbaseret kommunikation mellem microservices (fx RabbitMQ, Azure Service Bus, Kafka)</td>
 <td>
+CatalogService publicerer `catalog.item.created/updated/deleted` på topic exchangen `catalog`, så monolitten kan holde en read-only kopi opdateret. Følgende EIP patterns anvendes:
 
+- **Idempotent Receiver**: RabbitMQ kan levere samme besked flere gange, og events kan nå frem i forkert rækkefølge. Consumeren gemmer derfor hvert items `version` og ignorerer events med en version, der er lig med eller lavere end den gemte. Ét tjek håndterer altså både dubletter og forældede events.
+- **Competing Consumers**: consumeren er bygget, så flere instanser kan læse fra samme kø. Det er netop derfor, Idempotent Receiver er nødvendig. CatalogService skaleres derimod ikke som consumer, fordi den modtager sine ændringer som HTTP-requests og derfor skaleres med replicas i Docker Swarm, hvor Swarm load balancer requests fra API Gatewayen. Versionen beskyttes med optimistic concurrency i databasen, så to instanser aldrig udsteder samme version.
+- **Resequencer (fravalgt)**: den forudsætter en ubrudt sekvens, så et tabt event ville blokere alle efterfølgende. Da events er Document Messages med hele itemets tilstand, er det nok at droppe forældede events i stedet for at sortere dem.
 </td>
 <td>
+
+For at tjekke kig i `docs/messaging.drawio`
 
 </td>
 </tr>

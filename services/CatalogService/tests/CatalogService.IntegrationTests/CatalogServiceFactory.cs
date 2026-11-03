@@ -1,4 +1,5 @@
 using CatalogService.Api.Data;
+using CatalogService.Api.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -6,11 +7,12 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace CatalogService.IntegrationTests;
 
-// Starter CatalogService in-memory med en in-memory database i stedet for SQL Server,
-// så testene kan køre i CI uden en database.
+// Starter CatalogService in-memory med en in-memory database i stedet for Postgres og en mock i stedet for RabbitMQ,
+// så testene kan køre i CI uden en database eller broker.
 public class CatalogServiceFactory : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -20,6 +22,9 @@ public class CatalogServiceFactory : WebApplicationFactory<Program>
             services.RemoveAll<DbContextOptions<CatalogContext>>();
             services.RemoveAll<IDbContextOptionsConfiguration<CatalogContext>>();
             services.AddDbContext<CatalogContext>(options => options.UseInMemoryDatabase("CatalogServiceTests"));
+
+            services.RemoveAll<ICatalogEvents>();
+            services.AddSingleton(Mock.Of<ICatalogEvents>());
         });
     }
 

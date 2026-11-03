@@ -7,6 +7,7 @@ using MinimalApi.Endpoint.Configurations.Extensions;
 using MinimalApi.Endpoint.Extensions;
 using System.Text;
 using CatalogService.Api.Middleware;
+using CatalogService.Api.Messaging;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -57,6 +58,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 builder.Services.AddAuthorization();
+builder.Services.AddSingleton<RabbitMq>();
+builder.Services.AddSingleton<ICatalogEvents, CatalogEvents>();
 
 var app = builder.Build();
 

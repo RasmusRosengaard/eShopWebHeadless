@@ -17,6 +17,13 @@ namespace CatalogService.Api.CatalogItemEndpoints;
 /// </summary>
 public class DeleteCatalogItemEndpoint : IEndpoint<IResult, DeleteCatalogItemRequest, IRepository<CatalogItem>>
 {
+    private readonly ICatalogEvents _catalogEvents;
+
+    public DeleteCatalogItemEndpoint(ICatalogEvents catalogEvents)
+    {
+        _catalogEvents = catalogEvents;
+    }
+
     public void AddRoute(IEndpointRouteBuilder app)
     {
         app.MapDelete("api/catalog-items/{catalogItemId}",
@@ -38,6 +45,7 @@ public class DeleteCatalogItemEndpoint : IEndpoint<IResult, DeleteCatalogItemReq
             return Results.NotFound();
 
         await itemRepository.DeleteAsync(itemToDelete);
+        await _catalogEvents.CatalogItemDeleted(itemToDelete);
 
         return Results.Ok(response);
     }

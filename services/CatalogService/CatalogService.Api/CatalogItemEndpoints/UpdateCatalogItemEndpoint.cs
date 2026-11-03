@@ -17,10 +17,12 @@ namespace CatalogService.Api.CatalogItemEndpoints;
 public class UpdateCatalogItemEndpoint : IEndpoint<IResult, UpdateCatalogItemRequest, IRepository<CatalogItem>>
 { 
     private readonly IUriComposer _uriComposer;
+    private readonly ICatalogEvents _catalogEvents;
 
-    public UpdateCatalogItemEndpoint(IUriComposer uriComposer)
+    public UpdateCatalogItemEndpoint(IUriComposer uriComposer, ICatalogEvents catalogEvents)
     {
         _uriComposer = uriComposer;
+        _catalogEvents = catalogEvents;
     }
 
     public void AddRoute(IEndpointRouteBuilder app)
@@ -49,8 +51,10 @@ public class UpdateCatalogItemEndpoint : IEndpoint<IResult, UpdateCatalogItemReq
         existingItem.UpdateDetails(details);
         existingItem.UpdateBrand(request.CatalogBrandId);
         existingItem.UpdateType(request.CatalogTypeId);
+        existingItem.IncrementVersion();
 
         await itemRepository.UpdateAsync(existingItem);
+        await _catalogEvents.CatalogItemUpdated(existingItem);
 
         var dto = new CatalogItemDto
         {
