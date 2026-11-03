@@ -16,7 +16,7 @@
                 <mxCell id="admin" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;spacingLeft=10;" value="&lt;b&gt;BlazorAdmin&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;admin&lt;/font&gt;" vertex="1">
                     <mxGeometry height="60" width="190" x="45" y="330" as="geometry"/>
                 </mxCell>
-                <mxCell id="gateway" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=13;align=left;spacingLeft=10;" value="&lt;b&gt;API Gateway&lt;/b&gt;&lt;br&gt;YARP&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;GET /health&lt;/font&gt;" vertex="1">
+                <mxCell id="gateway" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=13;align=left;spacingLeft=10;" value="&lt;b&gt;API Gateway&lt;/b&gt;&lt;br&gt;YARP&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;routing · CORS&lt;br&gt;GET /health&lt;/font&gt;" vertex="1">
                     <mxGeometry height="120" width="200" x="300" y="250" as="geometry"/>
                 </mxCell>
                 <mxCell id="catalog" parent="1" style="rounded=1;arcSize=4;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;verticalAlign=top;fontStyle=1;fontSize=14;spacingTop=6;align=left;spacingLeft=12;" value="CatalogService (.NET 10)" vertex="1">
@@ -25,7 +25,7 @@
                 <mxCell id="catalog-endpoints" parent="1" style="text;html=1;align=left;verticalAlign=top;fontFamily=Courier New;fontSize=12;spacingLeft=6;" value="GET&amp;nbsp;&amp;nbsp;&amp;nbsp; /api/catalog-items&lt;br&gt;GET&amp;nbsp;&amp;nbsp;&amp;nbsp; /api/catalog-items/{id}&lt;br&gt;POST&amp;nbsp;&amp;nbsp; /api/catalog-items&lt;br&gt;PUT&amp;nbsp;&amp;nbsp;&amp;nbsp; /api/catalog-items&lt;br&gt;DELETE /api/catalog-items/{id}&lt;br&gt;GET&amp;nbsp;&amp;nbsp;&amp;nbsp; /api/catalog-brands&lt;br&gt;GET&amp;nbsp;&amp;nbsp;&amp;nbsp; /api/catalog-types&lt;br&gt;GET&amp;nbsp;&amp;nbsp;&amp;nbsp; /health" vertex="1">
                     <mxGeometry height="150" width="235" x="630" y="72" as="geometry"/>
                 </mxCell>
-                <mxCell id="catalog-db" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#ffffff;strokeColor=#82b366;fontSize=11;" value="CatalogDB" vertex="1">
+                <mxCell id="catalog-db" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#ffffff;strokeColor=#82b366;fontSize=11;" value="CatalogDB&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;PostgreSQL&lt;/font&gt;" vertex="1">
                     <mxGeometry height="80" width="75" x="870" y="100" as="geometry"/>
                 </mxCell>
                 <mxCell id="monolith" parent="1" style="rounded=1;arcSize=4;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;verticalAlign=top;fontStyle=1;fontSize=14;spacingTop=6;align=left;spacingLeft=12;" value="Monolit · PublicApi (.NET 8)" vertex="1">
@@ -34,7 +34,7 @@
                 <mxCell id="monolith-endpoints" parent="1" style="text;html=1;align=left;verticalAlign=top;fontFamily=Courier New;fontSize=12;spacingLeft=6;" value="/api/basket …&lt;br&gt;/api/orders …&lt;br&gt;/api/authenticate&lt;br&gt;/api/register" vertex="1">
                     <mxGeometry height="110" width="240" x="630" y="370" as="geometry"/>
                 </mxCell>
-                <mxCell id="shared-db" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#ffffff;strokeColor=#d6b656;fontSize=11;" value="eShop DB&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;SQL Server&lt;/font&gt;" vertex="1">
+                <mxCell id="shared-db" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#ffffff;strokeColor=#d6b656;fontSize=11;" value="eShop DB&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;SQL Server&lt;br&gt;catalog-kopi&lt;/font&gt;" vertex="1">
                     <mxGeometry height="90" width="75" x="870" y="390" as="geometry"/>
                 </mxCell>
                 <mxCell id="sync" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;fontSize=12;" value="&lt;b&gt;CatalogSyncConsumer&lt;/b&gt;" vertex="1">
@@ -83,9 +83,6 @@
                 </mxCell>
                 <mxCell id="ports-monolith" parent="1" style="text;html=1;align=right;verticalAlign=top;fontFamily=Courier New;fontSize=10;fontColor=#555555;spacingRight=6;" value="local&amp;nbsp; :5099&lt;br&gt;docker :5200" vertex="1">
                     <mxGeometry height="32" width="110" x="850" y="334" as="geometry"/>
-                </mxCell>
-                <mxCell id="mXEn7dnBQDZ0GqowVeNv-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="Skal denne kommunikation være messaging?" vertex="1">
-                    <mxGeometry height="60" width="120" x="460" y="117" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>

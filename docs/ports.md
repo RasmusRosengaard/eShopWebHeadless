@@ -27,6 +27,8 @@ Kilde: `docker-compose.yml` og `docker-compose.override.yml`.
 | BlazorAdmin | `eshopblazoradmin` | `5107 → 80` | `http://localhost:5107` |
 | SQL Server (monolit) | `sqlserver` | `1433 → 1433` | `localhost,1433` |
 | PostgreSQL (CatalogService) | `catalogdb` | `5433 → 5432` | `localhost:5433` |
+| RabbitMQ (AMQP) | `rabbitmq` | `5673 → 5672` | `localhost:5673` |
+| RabbitMQ (management-UI) | `rabbitmq` | `15673 → 15672` | `http://localhost:15673` (`catalog` / `catalogpassword`) |
 
 ### Værtsport vs. containerport
 
@@ -49,17 +51,22 @@ Browser (WebSpa / BlazorAdmin)
         │  apiBase
         ▼
 ReverseProxy (YARP)   lokalt :5050   ·  docker :5300
+        │  svarer selv på CORS-preflights (OPTIONS)
         │                                    │
         │  catch-all → legacy-cluster        │  GET/POST/PUT/DELETE /api/catalog-items/**
-        │  (alt andet, inkl. OPTIONS)        │  GET /api/catalog-brands
-        │                                    │  GET /api/catalog-types
+        │  (alt andet: basket, orders,       │  GET /api/catalog-brands
+        │   authenticate, register)          │  GET /api/catalog-types
         ▼                                    ▼  → catalog-cluster
-PublicApi                                 CatalogService
+PublicApi (monolit)                       CatalogService
 lokalt :5099                              lokalt :5048
 docker eshoppublicapi:8080                docker catalogservice:8080
-        │                                    │
+        │  ▲                                 │            │
+        │  │ CatalogSyncConsumer             │            │ publish catalog.item.*
+        │  └──── kø monolith.catalog ◄──── RabbitMQ ◄─────┘
+        │        (catalog.item.*)          exchange "catalog"
+        │                                  lokalt localhost:5673 · docker rabbitmq:5672
         ▼                                    ▼
-SQL Server                                PostgreSQL (egen database)
+SQL Server (read-only kopi af catalog)    PostgreSQL (catalog, ejer data)
 docker sqlserver:1433                     lokalt localhost:5433
                                           docker catalogdb:5432
 ```
@@ -75,11 +82,13 @@ docker sqlserver:1433                     lokalt localhost:5433
 | Gateway → CatalogService, lokalt | `services/ReverseProxy/ReverseProxy.Api/appsettings.Development.json` | `http://localhost:5048/` |
 | Gateway → CatalogService, Docker | `services/ReverseProxy/ReverseProxy.Api/appsettings.Docker.json` | `http://catalogservice:8080/` |
 | Gateway routes (hvad går hvorhen) | `services/ReverseProxy/ReverseProxy.Api/appsettings.json` | `legacy-route`, `catalog-*-read`, `catalog-items-write` |
-| PublicApi CORS (tilladte klienter) | `src/PublicApi/appsettings*.json` | `webBase`, `adminBase` |
-| CatalogService CORS (tilladte klienter) | `services/CatalogService/CatalogService.Api/appsettings(.Docker).json` | `webBase`, `adminBase` |
+| CORS (tilladte klienter), kun i gatewayen | `services/ReverseProxy/ReverseProxy.Api/appsettings.Development.json` / `appsettings.Docker.json` | `AllowedOrigins` → `https://localhost:5001`, `https://localhost:5003` / `http://localhost:5106`, `http://localhost:5107` |
 | CatalogService billed-URL'er | `services/CatalogService/CatalogService.Api/appsettings(.Docker).json` | `CatalogBaseUrl` → `https://localhost:5001` / `http://localhost:5106` |
 | CatalogService → database | `services/CatalogService/CatalogService.Api/appsettings.Development.json` / `appsettings.Docker.json` | `Host=localhost;Port=5433` / `Host=catalogdb;Port=5432` |
 | CatalogService-database (Postgres) | `docker-compose.yml` (`catalogdb`) | `5433 → 5432`, db `catalogdb`, bruger `catalog` |
+| CatalogService → RabbitMQ (publisher) | `services/CatalogService/CatalogService.Api/appsettings.Development.json` / `appsettings.Docker.json` | `rabbitMq` → `localhost:5673` / `rabbitmq:5672` |
+| PublicApi → RabbitMQ (consumer) | `src/PublicApi/appsettings.Development.json` / `appsettings.Docker.json` | `rabbitMq` → `localhost:5673` / `rabbitmq:5672` |
+| RabbitMQ | `docker-compose.yml` / `docker-compose.override.yml` (`rabbitmq`) | `5673 → 5672`, `15673 → 15672`, bruger `catalog` |
 
 ## Health check
 
