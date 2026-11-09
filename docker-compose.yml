@@ -70,7 +70,7 @@ services:
       dockerfile: services/CatalogService/CatalogService.Api/Dockerfile
     depends_on:
       catalogservice:
-        condition: service_healthy
+        condition: service_healthy # Lille fix der gør instans 2 ikke fejl ved startop, - ikke hensigtsmæssigt 
       rabbitmq:
         condition: service_healthy
     restart: on-failure
