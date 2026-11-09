@@ -1,0 +1,132 @@
+# Docker Swarm-udgave af løsningen. CatalogService kører i flere replicas, som YARP load balancer imellem.
+#
+#   docker swarm init                                  # én gang
+#   docker compose build                               # Swarm bygger ikke selv, bruger de lokale images
+#   docker stack deploy -c docker-stack.yml eshop
+#   docker service scale eshop_catalogservice=4        # skalér op/ned, mens det kører
+
+services:
+  eshopwebspa:
+    image: eshopwebspa:latest
+    ports:
+      - "5106:80"
+
+  eshopblazoradmin:
+    image: eshopblazoradmin:latest
+    ports:
+      - "5107:80"
+
+  eshoppublicapi:
+    image: eshoppublicapi:latest
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:8080
+    ports:
+      - "5200:8080"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+
+  sqlserver:
+    image: mcr.microsoft.com/azure-sql-edge
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    ports:
+      - "1433:1433"
+    environment:
+      - SA_PASSWORD=@someThingComplicated1234
+      - ACCEPT_EULA=Y
+
+  reverseproxy:
+    image: reverseproxy:latest
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      # tasks.catalogservice er Swarms DNS-navn, der returnerer IP'en på hver replica (i stedet for én VIP).
+      # YARP's DNS-resolver (Program.cs) laver én destination pr. IP og load balancer selv mellem dem.
+      - ReverseProxy__Clusters__catalog-cluster__Destinations__catalog-destination__Address=http://tasks.catalogservice:8080/
+    ports:
+      - "5300:8080"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+
+  # Migration og seed af catalogdb, én gang. Stopper med exit 0, når det er gjort; crasher og prøves igen,
+  # hvis catalogdb ikke er klar endnu. Replicas af catalogservice migrerer ikke selv, så de kan starte samtidig.
+  catalog-migrator:
+    image: catalogservice:latest
+    command: ["--migrate"]
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 20
+
+  catalogservice:
+    image: catalogservice:latest
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+    # Ingress: localhost:5400 rammer en vilkårlig replica (fordelt pr. forbindelse). Trafik via gatewayen fordeles af YARP.
+    ports:
+      - "5400:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+      # Rullende opdatering: én replica ad gangen, så CatalogService ikke er nede under en ny version.
+      update_config:
+        parallelism: 1
+        order: start-first
+
+  invalidmessageconsumer:
+    image: invalidmessageconsumer:latest
+    environment:
+      - DOTNET_ENVIRONMENT=Docker
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+
+  catalogdb:
+    image: postgres:17
+    volumes:
+      - catalogdb-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=catalog
+      - POSTGRES_PASSWORD=catalogpassword
+      - POSTGRES_DB=catalogdb
+    ports:
+      - "5433:5432"
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    # Fast hostname, fordi RabbitMQ gemmer sine data i en mappe opkaldt efter værtsnavnet.
+    hostname: rabbitmq
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=catalog
+      - RABBITMQ_DEFAULT_PASS=catalogpassword
+    ports:
+      - "5673:5672"
+      - "15673:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  rabbitmq-data:
+  catalogdb-data:
+  sqlserver-data:

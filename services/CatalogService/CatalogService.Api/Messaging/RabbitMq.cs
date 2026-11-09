@@ -1,8 +1,9 @@
 using System.Text.Json;
+using CatalogService.Api.Interfaces;
 using RabbitMQ.Client;
 
 namespace CatalogService.Api.Messaging;
-public class RabbitMq
+public class RabbitMq : IEventBus
 {
     public const string ExchangeName = "catalog";
 

@@ -2,7 +2,7 @@
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 WORKDIR /app
 EXPOSE 8080
-# curl til health checket i docker-compose.yml (aspnet-imaget har det ikke)
+# curl til health checket i docker-compose.yml og docker-stack.yml (aspnet-imaget har det ikke)
 RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 
 # Build context er repo-roden (samme som CI-pipelinen)

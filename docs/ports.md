@@ -1,6 +1,6 @@
 # Portoversigt
 
-Alle porte i løsningen, både lokalt (`dotnet run`) og i Docker (`docker compose up`).
+Alle porte i løsningen, både lokalt (`dotnet run`) og i Docker (`docker compose up` eller Swarm: `docker stack deploy -c docker-stack.yml eshop`). Portene er de samme i begge.
 
 ## Lokalt (`dotnet run`)
 
@@ -22,8 +22,8 @@ Kilde: `docker-compose.yml` og `docker-compose.override.yml`.
 |---|---|---|---|
 | ReverseProxy (gateway) | `reverseproxy` | `5300 → 8080` | `http://localhost:5300` |
 | PublicApi | `eshoppublicapi` | `5200 → 8080` | `http://localhost:5200` |
-| CatalogService | `catalogservice` | `5400 → 8080` | `http://localhost:5400` |
-| CatalogService (instans 2) | `catalogservice-2` | `5401 → 8080` | `http://localhost:5401` |
+| CatalogService | `catalogservice` | `5400 → 8080` | `http://localhost:5400` (i Swarm: en vilkårlig replica) |
+| CatalogService migrator | `catalog-migrator` | – | Kører migration + seed én gang og stopper |
 | WebSpa | `eshopwebspa` | `5106 → 80` | `http://localhost:5106` |
 | BlazorAdmin | `eshopblazoradmin` | `5107 → 80` | `http://localhost:5107` |
 | SQL Server (monolit) | `sqlserver` | `1433 → 1433` | `localhost,1433` |
@@ -82,7 +82,7 @@ docker sqlserver:1433                     lokalt localhost:5433
 | Gateway → PublicApi, lokalt | `services/ReverseProxy/ReverseProxy.Api/appsettings.Development.json` | `https://localhost:5099/` |
 | Gateway → PublicApi, Docker | `services/ReverseProxy/ReverseProxy.Api/appsettings.Docker.json` | `http://eshoppublicapi:8080/` |
 | Gateway → CatalogService, lokalt | `services/ReverseProxy/ReverseProxy.Api/appsettings.Development.json` | `http://localhost:5048/` |
-| Gateway → CatalogService, Docker | `services/ReverseProxy/ReverseProxy.Api/appsettings.Docker.json` | `http://catalogservice:8080/` + `http://catalogservice-2:8080/` (PowerOfTwoChoices) |
+| Gateway → CatalogService, Docker | `services/ReverseProxy/ReverseProxy.Api/appsettings.Docker.json` | Compose: `http://catalogservice:8080/`. Swarm: `http://tasks.catalogservice:8080/` (env i `docker-stack.yml`) → DNS-resolver laver én destination pr. replica (RoundRobin) |
 | Gateway routes (hvad går hvorhen) | `services/ReverseProxy/ReverseProxy.Api/appsettings.json` | `legacy-route`, `catalog-*-read`, `catalog-items-write` |
 | CORS (tilladte klienter), kun i gatewayen | `services/ReverseProxy/ReverseProxy.Api/appsettings.Development.json` / `appsettings.Docker.json` | `AllowedOrigins` → `https://localhost:5001`, `https://localhost:5003` / `http://localhost:5106`, `http://localhost:5107` |
 | CatalogService billed-URL'er | `services/CatalogService/CatalogService.Api/appsettings(.Docker).json` | `CatalogBaseUrl` → `https://localhost:5001` / `http://localhost:5106` |

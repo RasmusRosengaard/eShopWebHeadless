@@ -43,13 +43,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 builder.Services.AddAuthorization();
-builder.Services.AddSingleton<RabbitMq>();
+builder.Services.AddSingleton<IEventBus, RabbitMq>();
 builder.Services.AddSingleton<ICatalogEvents, CatalogEvents>();
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+// Migration og seed må kun køre ét sted ad gangen. I Docker/Swarm starter alle replicas samtidig,
+// så det klares af servicen catalog-migrator (samme image, startet med --migrate), som stopper bagefter.
+// Lokalt (Development) kører det ved opstart som før, da der kun er én instans.
+var migrateOnly = args.Contains("--migrate");
+if (migrateOnly || app.Environment.IsDevelopment())
 {
+    using var scope = app.Services.CreateScope();
     var context = scope.ServiceProvider.GetRequiredService<CatalogContext>();
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
@@ -58,6 +63,11 @@ using (var scope = app.Services.CreateScope())
         await context.Database.MigrateAsync();
     }
     await CatalogContextSeed.SeedAsync(context, logger);
+}
+
+if (migrateOnly)
+{
+    return;
 }
 
 app.UseMiddleware<ExceptionMiddleware>();

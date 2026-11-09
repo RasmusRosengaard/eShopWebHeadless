@@ -44,33 +44,27 @@ services:
     depends_on:
       - "eshoppublicapi"
       - "catalogservice"
-      - "catalogservice-2"
+  # Kører migration og seed af catalogdb én gang og stopper (samme image som catalogservice, startet med --migrate).
+  # Gør, at catalogservice kan køre i flere replicas uden at de migrerer/seeder samtidig (se docker-stack.yml).
+  catalog-migrator:
+    image: ${DOCKER_REGISTRY-}catalogservice
+    build:
+      context: .
+      dockerfile: services/CatalogService/CatalogService.Api/Dockerfile
+    command: ["--migrate"]
+    depends_on:
+      catalogdb:
+        condition: service_started
+    restart: on-failure # catalogdb er måske ikke klar endnu → prøv igen
+  # Én instans her (udvikling). Skalering sker i Swarm: docker-stack.yml (replicas).
   catalogservice:
     image: ${DOCKER_REGISTRY-}catalogservice
     build:
       context: .
       dockerfile: services/CatalogService/CatalogService.Api/Dockerfile
     depends_on:
-      catalogdb:
-        condition: service_started
-      rabbitmq:
-        condition: service_healthy
-    restart: on-failure
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-      interval: 5s
-      timeout: 3s
-      retries: 20
-  # Instans 2 af CatalogService: samme image og database. YARP fordeler trafikken mellem de to (se appsettings.Docker.json).
-  # Venter på instans 1, så migration og seed ikke kører i begge på samme tid.
-  catalogservice-2:
-    image: ${DOCKER_REGISTRY-}catalogservice
-    build:
-      context: .
-      dockerfile: services/CatalogService/CatalogService.Api/Dockerfile
-    depends_on:
-      catalogservice:
-        condition: service_healthy # Lille fix der gør instans 2 ikke fejl ved startop, - ikke hensigtsmæssigt 
+      catalog-migrator:
+        condition: service_completed_successfully
       rabbitmq:
         condition: service_healthy
     restart: on-failure
