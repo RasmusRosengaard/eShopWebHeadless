@@ -5,12 +5,12 @@ namespace CatalogService.Api.Messaging;
 
 public class CatalogEvents : ICatalogEvents
 {
-    private readonly RabbitMq _rabbitMq;
+    private readonly IEventBus _eventBus;
     private readonly IUriComposer _uriComposer;
 
-    public CatalogEvents(RabbitMq rabbitMq, IUriComposer uriComposer)
+    public CatalogEvents(IEventBus eventBus, IUriComposer uriComposer)
     {
-        _rabbitMq = rabbitMq;
+        _eventBus = eventBus;
         _uriComposer = uriComposer;
     }
 
@@ -24,7 +24,7 @@ public class CatalogEvents : ICatalogEvents
             item = ToData(item)
         };
 
-        await _rabbitMq.Publish("catalog.item.created", message);
+        await _eventBus.Publish("catalog.item.created", message);
     }
 
     public async Task CatalogItemUpdated(CatalogItem item)
@@ -37,7 +37,7 @@ public class CatalogEvents : ICatalogEvents
             item = ToData(item)
         };
 
-        await _rabbitMq.Publish("catalog.item.updated", message);
+        await _eventBus.Publish("catalog.item.updated", message);
     }
 
     public async Task CatalogItemDeleted(CatalogItem item)
@@ -50,7 +50,7 @@ public class CatalogEvents : ICatalogEvents
             id = item.Id
         };
 
-        await _rabbitMq.Publish("catalog.item.deleted", message);
+        await _eventBus.Publish("catalog.item.deleted", message);
     }
 
     private object ToData(CatalogItem item)

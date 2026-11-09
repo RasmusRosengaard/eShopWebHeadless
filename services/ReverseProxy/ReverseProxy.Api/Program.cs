@@ -18,8 +18,13 @@ builder.Services.AddCors(options =>
         });
 });
 
+// DNS-resolveren slår hver destinations hostname op og laver én destination pr. IP.
+// I Swarm returnerer tasks.catalogservice IP'en på hver replica, så YARP selv load balancer mellem dem
+// (Swarms VIP fordeler pr. TCP-forbindelse, og YARP genbruger sin forbindelse → alt ville ramme én replica).
+// Kort RefreshPeriod, så replicas, der skaleres op eller ned, opdages hurtigt.
 builder.Services.AddReverseProxy()
-    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"))
+    .AddDnsDestinationResolver(options => options.RefreshPeriod = TimeSpan.FromSeconds(10));
 
 var app = builder.Build();
 

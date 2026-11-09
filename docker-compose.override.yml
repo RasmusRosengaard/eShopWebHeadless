@@ -19,16 +19,14 @@ services:
       - ASPNETCORE_ENVIRONMENT=Docker
     ports:
       - "5300:8080"
+  catalog-migrator:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
   catalogservice:
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
     ports:
       - "5400:8080"
-  catalogservice-2:
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Docker
-    ports:
-      - "5401:8080"
   invalidmessageconsumer:
     environment:
       - DOTNET_ENVIRONMENT=Docker

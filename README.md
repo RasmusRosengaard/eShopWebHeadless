@@ -66,20 +66,22 @@ Catalog udskilt i trin; systemet virkede efter hvert trin:
 - YARP = eneste indgang; catalog-routes → CatalogService, catch-all → monolitten
 - CORS samlet i gatewayen → preflights besvares, selv hvis servicen bag er nede
 - Autentificering: JWT valideres i servicerne, ikke i gatewayen
-- Load balancing i YARP: `catalog-cluster` har 2 destinations (`catalogservice`, `catalogservice-2`), `PowerOfTwoChoices` (YARPs standard: vælger 2 tilfældige, sender til den med færrest aktive requests)
-  - Aktivt health check: YARP kalder `/health` hvert 10. sek. → instans, der ikke svarer, får ingen trafik
-  - Testet: 30 requests fordelt på begge (15/15 med `RoundRobin`, ca. 13/17 med `PowerOfTwoChoices`); instans 1 stoppet → alle requests svarer stadig 200
-  - Horisontal, men statisk skalering: antal ligger fast i `docker-compose.yml` + `appsettings.Docker.json`
-  - Kun CatalogService har 2 instanser → skaleres uafhængigt af monolitten; stateless (JWT), deler én database
-  - Docker health check på begge: `curl -f http://localhost:8080/health` (curl installeret i Dockerfile)
-  - `catalogservice-2` venter på, at instans 1 er healthy, så migration og seed ikke kører samtidig
-- Fravalgt: Docker Swarm (`docker service scale`). Testet: Swarm fordeler pr. TCP-forbindelse, og YARP genbruger sin forbindelse → alle requests via gatewayen ramte samme replica. Kræver, at YARP selv slår replicas op (`tasks.catalogservice` + `AddDnsDestinationResolver`)
+- Skalering med Docker Swarm (`docker-stack.yml`): `catalogservice` kører i `replicas: 2`, skaleres mens det kører med `docker service scale eshop_catalogservice=N`
+  - Kun CatalogService skaleres → uafhængigt af monolitten; stateless (JWT), replicas deler én database
+- Load balancing i YARP, ikke i Swarm: Swarms VIP fordeler pr. TCP-forbindelse, og YARP genbruger sin forbindelse → alt ville ramme én replica
+  - Destination `http://tasks.catalogservice:8080/`: Swarm-DNS-navn, der returnerer IP'en på hver replica
+  - `AddDnsDestinationResolver` (refresh hvert 10. sek.) → én YARP-destination pr. replica; nye/fjernede replicas opdages automatisk
+  - `RoundRobin`: replicas på skift (A, B, A, B …); valgt for simplicitet frem for YARPs standard `PowerOfTwoChoices` (vælger 2 tilfældige, sender til den med færrest aktive requests)
+  - Aktivt health check: YARP kalder `/health` hvert 10. sek. → replica, der ikke svarer, får ingen trafik; Swarm genstarter den (`restart_policy`) og bruger samme health check (`curl -f http://localhost:8080/health`)
+- Migration og seed i separat service `catalog-migrator` (samme image, `--migrate`), som kører én gang og stopper → replicas migrerer/seeder ikke samtidig
+- Rullende opdatering: `update_config` (én replica ad gangen, `start-first`)
+- `docker-compose.yml` bruges til build og udvikling (1 instans af catalogservice)
 - Mangler: rate-limiting
 
 </td>
 <td>
 
-`services/ReverseProxy/ReverseProxy.Api/` (`Program.cs`, `appsettings*.json`), `docker-compose.yml` (`catalogservice-2`)
+`docker-stack.yml`, `services/ReverseProxy/ReverseProxy.Api/` (`Program.cs`, `appsettings*.json`), `services/CatalogService/CatalogService.Api/Program.cs` (`--migrate`)
 
 </td>
 </tr>
@@ -118,7 +120,7 @@ Catalog udskilt i trin; systemet virkede efter hvert trin:
 <td>
 
 - Én `<service>.yml` pr. service, trigges kun af egen mappe → bygges og testes uafhængigt
-- Docker-image pr. service; hele systemet kører i `docker-compose.yml`
+- Docker-image pr. service; hele systemet kører i Docker Swarm (`docker-stack.yml`) eller, til udvikling, `docker-compose.yml`
 - Mangler: rigtig deploy (staging/production er i dag kun `echo`-trin, production med manuel godkendelse)
 
 </td>
