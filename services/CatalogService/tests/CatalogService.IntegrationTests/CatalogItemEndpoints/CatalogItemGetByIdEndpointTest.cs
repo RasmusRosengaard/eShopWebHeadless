@@ -11,7 +11,13 @@ public class CatalogItemGetByIdEndpointTest
     [TestMethod]
     public async Task ReturnsItemGivenValidId()
     {
-        var response = await ProgramTest.NewClient.GetAsync("api/catalog-items/5");
+        // Arrange
+        var client = ProgramTest.NewClient;
+
+        // Act
+        var response = await client.GetAsync("api/catalog-items/5");
+
+        // Assert
         response.EnsureSuccessStatusCode();
         var stringResponse = await response.Content.ReadAsStringAsync();
         var model = stringResponse.FromJson<GetByIdCatalogItemResponse>();
@@ -23,8 +29,13 @@ public class CatalogItemGetByIdEndpointTest
     [TestMethod]
     public async Task ReturnsNotFoundGivenInvalidId()
     {
-        var response = await ProgramTest.NewClient.GetAsync("api/catalog-items/0");
+        // Arrange
+        var client = ProgramTest.NewClient;
 
+        // Act
+        var response = await client.GetAsync("api/catalog-items/0");
+
+        // Assert
         Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
     }
 }

@@ -20,23 +20,32 @@ public class CreateCatalogItemEndpointTest
     [TestMethod]
     public async Task ReturnsNotAuthorizedGivenNormalUserToken()
     {
+        // Arrange: almindelig bruger uden Administrators-rollen
         var jsonContent = GetValidNewItemJson();
         var token = ApiTokenHelper.GetNormalUserToken();
         var client = ProgramTest.NewClient;
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        // Act
         var response = await client.PostAsync("api/catalog-items", jsonContent);
 
+        // Assert
         Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [TestMethod]
     public async Task ReturnsSuccessGivenValidNewItemAndAdminUserToken()
     {
+        // Arrange
         var jsonContent = GetValidNewItemJson();
         var adminToken = ApiTokenHelper.GetAdminUserToken();
         var client = ProgramTest.NewClient;
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+
+        // Act
         var response = await client.PostAsync("api/catalog-items", jsonContent);
+
+        // Assert
         response.EnsureSuccessStatusCode();
         var stringResponse = await response.Content.ReadAsStringAsync();
         var model = stringResponse.FromJson<CreateCatalogItemResponse>();

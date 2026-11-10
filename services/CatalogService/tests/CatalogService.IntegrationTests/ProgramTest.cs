@@ -7,9 +7,21 @@ public class ProgramTest
 {
     private static CatalogServiceFactory _application = new();
 
-    public static HttpClient NewClient => _application.CreateClient();
+    public static HttpClient NewClient
+    {
+        get
+        {
+            return _application.CreateClient();
+        }
+    }
 
-    public static IServiceProvider Services => _application.Services;
+    public static IServiceProvider Services
+    {
+        get
+        {
+            return _application.Services;
+        }
+    }
 
     [AssemblyInitialize]
     public static async Task AssemblyInitialize(TestContext _)

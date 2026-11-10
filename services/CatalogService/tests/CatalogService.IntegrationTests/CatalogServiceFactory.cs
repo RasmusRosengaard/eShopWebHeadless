@@ -12,7 +12,7 @@ using Moq;
 namespace CatalogService.IntegrationTests;
 
 // Starter CatalogService in-memory med en in-memory database i stedet for Postgres og en mock i stedet for RabbitMQ,
-// så testene kan køre i CI uden en database eller broker.
+// så testene kan køre i CI uden den rigtige database eller broker.
 public class CatalogServiceFactory : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
