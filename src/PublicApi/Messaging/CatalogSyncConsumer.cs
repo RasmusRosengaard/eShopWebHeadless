@@ -64,31 +64,24 @@ public class CatalogSyncConsumer : BackgroundService
         {
             Uri = new Uri($"amqp://{section["user"]}:{section["password"]}@{section["host"]}:{section["port"]}")
         };
-
         await using var connection = await factory.CreateConnectionAsync();
         await using var channel = await connection.CreateChannelAsync();
-
         // Samme deklaration som CatalogService, så det er ligegyldigt, hvem der starter først.
         await channel.ExchangeDeclareAsync(ExchangeName, ExchangeType.Topic, durable: true);
-
         // Durable kø: beskeder venter her, mens monolitten er nede (Durable Subscriber).
         await channel.QueueDeclareAsync(QueueName, durable: true, exclusive: false, autoDelete: false);
         await channel.QueueBindAsync(QueueName, ExchangeName, BindingKey);
-
         // Invalid Message Channel: beskeder, consumeren ikke kan forstå, parkeres her til manuel inspektion.
         // Ingen binding: vi publicerer via default exchange, som leverer til køen med samme navn som routing key.
         await channel.QueueDeclareAsync(InvalidQueueName, durable: true, exclusive: false, autoDelete: false);
-
         // Én besked ad gangen pr. consumer, så en replica ikke tager flere, end den kan nå.
         await channel.BasicQosAsync(prefetchSize: 0, prefetchCount: 1, global: false);
-
         var consumer = new AsyncEventingBasicConsumer(channel);
         consumer.ReceivedAsync += async (_, message) =>
         {
             try
             {
                 await HandleMessage(message.RoutingKey, message.Body.ToArray());
-
                 // Ack først efter at ændringen er gemt. Crasher vi før, leveres beskeden igen.
                 await channel.BasicAckAsync(message.DeliveryTag, multiple: false);
             }
@@ -99,9 +92,7 @@ public class CatalogSyncConsumer : BackgroundService
                 // Fejlen logges her; i køen ligger kun den oprindelige besked.
                 // Publish før ack: crasher vi imellem, ender beskeden to gange i invalid-køen frem for at gå tabt.
                 _logger.LogError(ex, "Kan ikke behandle {RoutingKey}, flyttes til {Queue}", message.RoutingKey, InvalidQueueName);
-
                 var properties = new BasicProperties { DeliveryMode = DeliveryModes.Persistent };
-
                 await channel.BasicPublishAsync(exchange: "", routingKey: InvalidQueueName, mandatory: false,
                     basicProperties: properties, body: message.Body);
                 await channel.BasicAckAsync(message.DeliveryTag, multiple: false);
@@ -117,7 +108,6 @@ public class CatalogSyncConsumer : BackgroundService
 
         await channel.BasicConsumeAsync(QueueName, autoAck: false, consumer);
         _logger.LogInformation("Lytter på {Queue}", QueueName);
-
         await Task.Delay(Timeout.Infinite, stoppingToken);
     }
 

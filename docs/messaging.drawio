@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram name="Messaging" id="messaging">
-        <mxGraphModel dx="1239" dy="1002" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="1078" dy="933" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -37,26 +37,20 @@
                         <mxPoint x="140" y="470" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="ic-e-created" parent="1" style="strokeWidth=2;dashed=0;align=center;fontSize=8;shape=rect;fontStyle=1;whiteSpace=wrap;html=1;fillColor=#83BEFF;" value="E" vertex="1">
-                    <mxGeometry height="22" width="22" x="398" y="-1" as="geometry"/>
-                </mxCell>
                 <mxCell id="ic-d-created" parent="1" style="strokeWidth=2;dashed=0;align=center;fontSize=8;shape=rect;fontStyle=1;whiteSpace=wrap;html=1;fillColor=#C7A0FF;" value="D" vertex="1">
-                    <mxGeometry height="22" width="22" x="424" y="-1" as="geometry"/>
+                    <mxGeometry height="22" width="22" x="398" y="-2" as="geometry"/>
                 </mxCell>
-                <mxCell id="lbl-created" parent="1" style="text;html=1;align=left;verticalAlign=top;fontSize=12;" value="&lt;b&gt;catalog.item.created&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot; color=&quot;#555555&quot;&gt;Event Message (push) · event + document&lt;/font&gt;" vertex="1">
-                    <mxGeometry height="34" width="300" x="454" y="-5" as="geometry"/>
+                <mxCell id="lbl-created" parent="1" style="text;html=1;align=left;verticalAlign=top;fontSize=12;" value="&lt;b&gt;catalog.item.created&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#555555&quot;&gt;&lt;span style=&quot;font-size: 10px;&quot;&gt;Document Message&lt;/span&gt;&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="34" width="300" x="426" y="-8" as="geometry"/>
                 </mxCell>
                 <mxCell id="m-created" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#83BEFF;strokeWidth=2;align=left;verticalAlign=top;spacingLeft=10;spacingTop=6;fontSize=12;" value="&lt;font face=&quot;Courier New&quot; style=&quot;font-size:10px&quot;&gt;{&lt;br&gt;&amp;nbsp;&amp;nbsp;&quot;eventId&quot;: &quot;3f2a…&quot;,&lt;br&gt;&amp;nbsp;&amp;nbsp;&quot;occurredAt&quot;: &quot;2026-10-22T10:42:41Z&quot;,&lt;br&gt;&amp;nbsp;&amp;nbsp;&quot;version&quot;: 1,&lt;br&gt;&amp;nbsp;&amp;nbsp;&quot;item&quot;: {&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&quot;id&quot;: 13,&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&quot;name&quot;: &quot;Mug&quot;,&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&quot;description&quot;: &quot;Black mug&quot;,&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&quot;price&quot;: 9.50,&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&quot;pictureUri&quot;: &quot;http://localhost:5106/images/products/13.png&quot;,&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&quot;catalogTypeId&quot;: 1,&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&quot;catalogBrandId&quot;: 2&lt;br&gt;&amp;nbsp;&amp;nbsp;}&lt;br&gt;}&lt;/font&gt;" vertex="1">
                     <mxGeometry height="241" width="330" x="398" y="29" as="geometry"/>
                 </mxCell>
-                <mxCell id="ic-e-updated" parent="1" style="strokeWidth=2;dashed=0;align=center;fontSize=8;shape=rect;fontStyle=1;whiteSpace=wrap;html=1;fillColor=#83BEFF;" value="E" vertex="1">
-                    <mxGeometry height="22" width="22" x="400" y="275" as="geometry"/>
-                </mxCell>
                 <mxCell id="ic-d-updated" parent="1" style="strokeWidth=2;dashed=0;align=center;fontSize=8;shape=rect;fontStyle=1;whiteSpace=wrap;html=1;fillColor=#C7A0FF;" value="D" vertex="1">
-                    <mxGeometry height="22" width="22" x="426" y="275" as="geometry"/>
+                    <mxGeometry height="22" width="22" x="404" y="277" as="geometry"/>
                 </mxCell>
-                <mxCell id="lbl-updated" parent="1" style="text;html=1;align=left;verticalAlign=top;fontSize=12;" value="&lt;b&gt;catalog.item.updated&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot; color=&quot;#555555&quot;&gt;Event Message (push) · event + document&lt;/font&gt;" vertex="1">
-                    <mxGeometry height="34" width="300" x="456" y="271" as="geometry"/>
+                <mxCell id="lbl-updated" parent="1" style="text;html=1;align=left;verticalAlign=top;fontSize=12;" value="&lt;b&gt;catalog.item.updated&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#555555&quot;&gt;&lt;span style=&quot;font-size: 10px;&quot;&gt;Document Message&lt;/span&gt;&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="34" width="300" x="430" y="270" as="geometry"/>
                 </mxCell>
                 <mxCell id="m-updated" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#83BEFF;strokeWidth=2;align=left;verticalAlign=top;spacingLeft=10;spacingTop=6;fontSize=12;" value="&lt;font face=&quot;Courier New&quot; style=&quot;font-size:10px&quot;&gt;{&lt;br&gt;&amp;nbsp;&amp;nbsp;&quot;eventId&quot;: &quot;9c1b…&quot;,&lt;br&gt;&amp;nbsp;&amp;nbsp;&quot;occurredAt&quot;: &quot;2026-10-22T11:05:12Z&quot;,&lt;br&gt;&amp;nbsp;&amp;nbsp;&quot;version&quot;: 2,&lt;br&gt;&amp;nbsp;&amp;nbsp;&quot;item&quot;: { …hele itemet… }&lt;br&gt;}&lt;/font&gt;" vertex="1">
                     <mxGeometry height="120" width="330" x="400" y="305" as="geometry"/>
@@ -64,7 +58,7 @@
                 <mxCell id="ic-e-deleted" parent="1" style="strokeWidth=2;dashed=0;align=center;fontSize=8;shape=rect;fontStyle=1;whiteSpace=wrap;html=1;fillColor=#83BEFF;" value="E" vertex="1">
                     <mxGeometry height="22" width="22" x="400" y="438" as="geometry"/>
                 </mxCell>
-                <mxCell id="lbl-deleted" parent="1" style="text;html=1;align=left;verticalAlign=top;fontSize=12;" value="&lt;b&gt;catalog.item.deleted&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot; color=&quot;#555555&quot;&gt;Event Message · ren notifikation&lt;/font&gt;" vertex="1">
+                <mxCell id="lbl-deleted" parent="1" style="text;html=1;align=left;verticalAlign=top;fontSize=12;" value="&lt;b&gt;catalog.item.deleted&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#555555&quot;&gt;Event Message&lt;/font&gt;" vertex="1">
                     <mxGeometry height="34" width="300" x="426" y="432" as="geometry"/>
                 </mxCell>
                 <mxCell id="m-deleted" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#83BEFF;strokeWidth=2;align=left;verticalAlign=top;spacingLeft=10;spacingTop=6;fontSize=12;" value="&lt;font face=&quot;Courier New&quot; style=&quot;font-size:10px&quot;&gt;{&lt;br&gt;&amp;nbsp;&amp;nbsp;&quot;eventId&quot;: &quot;e71d…&quot;,&lt;br&gt;&amp;nbsp;&amp;nbsp;&quot;occurredAt&quot;: &quot;2026-10-22T12:30:00Z&quot;,&lt;br&gt;&amp;nbsp;&amp;nbsp;&quot;version&quot;: 3,&lt;br&gt;&amp;nbsp;&amp;nbsp;&quot;id&quot;: 13&lt;br&gt;}&lt;/font&gt;" vertex="1">
@@ -297,7 +291,7 @@
                 <mxCell id="sync-edc-b" parent="1" style="rhombus;html=1;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
                     <mxGeometry height="7" width="7" x="1720" y="418" as="geometry"/>
                 </mxCell>
-                <mxCell id="sync-edc-e" edge="1" parent="1" source="sync-edc-a" target="sync-edc-b" style="html=1;endArrow=block;endSize=3;strokeColor=#000000;strokeWidth=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" value="">
+                <mxCell id="sync-edc-e" edge="1" parent="1" source="sync-edc-a" style="html=1;endArrow=block;endSize=3;strokeColor=#000000;strokeWidth=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="sync-edc-b" value="">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="sync-sa" parent="1" style="rounded=0;html=1;fillColor=#c0f5a9;strokeColor=#000000;strokeWidth=1;" value="" vertex="1">
@@ -309,7 +303,7 @@
                 <mxCell id="sync-sa-b" parent="1" style="rhombus;html=1;fillColor=#ffffff;strokeColor=#000000;" value="" vertex="1">
                     <mxGeometry height="7" width="7" x="1758" y="418" as="geometry"/>
                 </mxCell>
-                <mxCell id="sync-sa-e" edge="1" parent="1" source="sync-sa-a" target="sync-sa-b" style="html=1;endArrow=block;endSize=3;strokeColor=#000000;strokeWidth=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" value="">
+                <mxCell id="sync-sa-e" edge="1" parent="1" source="sync-sa-a" style="html=1;endArrow=block;endSize=3;strokeColor=#000000;strokeWidth=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="sync-sa-b" value="">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="lg-edc" parent="1" style="rounded=0;html=1;fillColor=#c0f5a9;strokeColor=#000000;strokeWidth=1;" value="" vertex="1">
@@ -321,7 +315,7 @@
                 <mxCell id="lg-edc-b" parent="1" style="rhombus;html=1;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
                     <mxGeometry height="7" width="7" x="72" y="1019" as="geometry"/>
                 </mxCell>
-                <mxCell id="lg-edc-e" edge="1" parent="1" source="lg-edc-a" target="lg-edc-b" style="html=1;endArrow=block;endSize=3;strokeColor=#000000;strokeWidth=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" value="">
+                <mxCell id="lg-edc-e" edge="1" parent="1" source="lg-edc-a" style="html=1;endArrow=block;endSize=3;strokeColor=#000000;strokeWidth=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="lg-edc-b" value="">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="lg-sa" parent="1" style="rounded=0;html=1;fillColor=#c0f5a9;strokeColor=#000000;strokeWidth=1;" value="" vertex="1">
@@ -333,7 +327,7 @@
                 <mxCell id="lg-sa-b" parent="1" style="rhombus;html=1;fillColor=#ffffff;strokeColor=#000000;" value="" vertex="1">
                     <mxGeometry height="7" width="7" x="72" y="1045" as="geometry"/>
                 </mxCell>
-                <mxCell id="lg-sa-e" edge="1" parent="1" source="lg-sa-a" target="lg-sa-b" style="html=1;endArrow=block;endSize=3;strokeColor=#000000;strokeWidth=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" value="">
+                <mxCell id="lg-sa-e" edge="1" parent="1" source="lg-sa-a" style="html=1;endArrow=block;endSize=3;strokeColor=#000000;strokeWidth=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="lg-sa-b" value="">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="lg-edc-t" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=11;" value="Event-Driven Consumer" vertex="1">

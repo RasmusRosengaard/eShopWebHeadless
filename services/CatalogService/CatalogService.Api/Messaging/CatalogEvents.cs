@@ -55,6 +55,7 @@ public class CatalogEvents : ICatalogEvents
 
     private object ToData(CatalogItem item)
     {
+        
         return new
         {
             id = item.Id,
