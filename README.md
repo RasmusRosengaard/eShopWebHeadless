@@ -2,6 +2,19 @@
 
 Krav fra: https://drive.google.com/file/d/18PVhcuDnv0K4dXrhbqM-yhhQRgGZaDMz/view?usp=sharing
 
+Uddybes i rapporten (*Semesterprojekt i System Integration & Store Systemer*); afsnitsnavne nedenfor henviser til den.
+
+| Underspørgsmål (problemformulering) | Afsnit i rapporten |
+|---|---|
+| Opdeling i services og vurdering af grænser | Servicegrænser |
+| Uafhængig build, test og udrulning | Uafhængig build, test og udrulning |
+| Udskillelse mens systemet er i drift | Udskillelse af funktionalitet med Strangler Fig |
+| Skalering og trafik kun til raske replikaer | Skalering med Docker Swarm |
+| Kommunikation uden afhængigheder, ingen tabte beskeder | Asynkron kommunikation mellem microservices |
+| Test af services og asynkron kommunikation | Test af microservices og asynkron kommunikation |
+| Opdagelse og håndtering af fejl | Monitorering og observability af microservices |
+| Valg og begrænsninger | Diskussion |
+
 <table>
 <tr>
 <th>Krav</th>
@@ -17,7 +30,10 @@ Krav fra: https://drive.google.com/file/d/18PVhcuDnv0K4dXrhbqM-yhhQRgGZaDMz/view
 - Bounded contexts (DDD): Catalog, Ordering, Inventory; ét forretningsområde pr. service
 - Catalog: udskilt · Ordering: stadig i monolitten · Inventory: ikke lavet
 - Kun 1–2 bygges pga. teamets størrelse → kravet om min. 3 er bevidst ikke fuldt opfyldt
-- Mangler: vurdering med cohesion og coupling
+- Grænser fastholdes med høj cohesion (al katalogfunktionalitet i CatalogService) og lav coupling (egen database, data deles kun via asynkrone beskeder)
+- Kriterie: en grænse er god, hvis servicen kan ændres og udrulles uden ændringer i andre services
+- Catalog vurderes som god grænse: fælles ændringer med monolitten skyldes kun den midlertidige read-only kopi, ikke delt katalogfunktionalitet. Shared database fravalgt (tæt kobling via skemaet)
+- Rapport: *Servicegrænser*, *Diskussion*
 
 </td>
 <td>
@@ -52,8 +68,12 @@ Catalog udskilt i trin; systemet virkede efter hvert trin:
 <td>Lagerstyringssystem implementeret som selvstændig microservice</td>
 <td>
 
+- Ikke implementeret grundet tidsmangel (Inventory er identificeret som bounded context, men ikke bygget)
+
 </td>
 <td>
+
+–
 
 </td>
 </tr>
@@ -72,11 +92,14 @@ Catalog udskilt i trin; systemet virkede efter hvert trin:
   - Destination `http://tasks.catalogservice:8080/`: Swarm-DNS-navn, der returnerer IP'en på hver replica
   - `AddDnsDestinationResolver` (refresh hvert 10. sek.) → én YARP-destination pr. replica; nye/fjernede replicas opdages automatisk
   - `RoundRobin`: replicas på skift (A, B, A, B …); valgt for simplicitet frem for YARPs standard `PowerOfTwoChoices` (vælger 2 tilfældige, sender til den med færrest aktive requests)
-  - Aktivt health check: YARP kalder `/health` hvert 10. sek. → replica, der ikke svarer, får ingen trafik; Swarm genstarter den (`restart_policy`) og bruger samme health check (`curl -f http://localhost:8080/health`)
+  - Aktivt health check: YARP kalder `/health` hvert 10. sek. → replica, der ikke svarer, får ingen trafik
+  - Swarm har sit eget health check på samme endpoint (`curl -f http://localhost:8080/health`, hvert 5. sek.) og genstarter containeren (`restart_policy`)
+  - Begrænsning: `/health` tjekker kun HTTP, ikke databasen → deep health check ville være bedre (rapport: *Diskussion*)
 - Migration og seed i separat service `catalog-migrator` (samme image, `--migrate`), som kører én gang og stopper → replicas migrerer/seeder ikke samtidig
 - Rullende opdatering: `update_config` (én replica ad gangen, `start-first`)
 - `docker-compose.yml` bruges til build og udvikling (1 instans af catalogservice)
 - Mangler: rate-limiting
+- Rapport: *Udskillelse af funktionalitet med Strangler Fig*, *Skalering med Docker Swarm*
 
 </td>
 <td>
@@ -93,7 +116,10 @@ Catalog udskilt i trin; systemet virkede efter hvert trin:
 
 - CatalogService publicerer `catalog.item.created/updated/deleted` via RabbitMQ → monolitten opdaterer sin read-only kopi
 - Asynkront: CatalogService venter ikke på monolitten; monolitten må være nede (eventually consistent)
+- Ingen ved, at der bruges RabbitMQ, udover Messaging Gatewayen (`ICatalogEvents` → `IEventBus`)
+- Pris: eventual consistency; monolittens kopi kan i kort tid være bagud
 - EIP-patterns: se [EIP-patterns](#eip-patterns)
+- Rapport: *Asynkron kommunikation mellem microservices*
 
 </td>
 <td>
@@ -108,8 +134,17 @@ Catalog udskilt i trin; systemet virkede efter hvert trin:
 <td>Fejlhåndtering og overvågning (fx Circuit Breaker, logging, ELK eller Prometheus/Grafana)</td>
 <td>
 
+- Health checks: `/health` i CatalogService og ReverseProxy; bruges af YARP og Swarm (se API Gateway)
+- Invalid Message Channel: beskeder, CatalogSyncConsumer ikke kan behandle (tom/ugyldig JSON, ukendt routing key, manglende `item`), flyttes til `monolith.catalog.invalid` og printes af `InvalidMessageConsumer`
+- Fejl under behandling: én genlevering (`nack`, `requeue: true`), fejler den igen → invalid-køen
+- Logs: kun i hver containers konsol
+- Ikke implementeret grundet tidsmangel: correlation ID, central logning (ELK), metrics og traces (Prometheus/Grafana), Circuit Breaker
+- Rapport: *Monitorering og observability af microservices*
+
 </td>
 <td>
+
+`services/CatalogService/CatalogService.Api/Program.cs` (health checks), `src/PublicApi/Messaging/CatalogSyncConsumer.cs` (`HandleMessage`, catch-blokke), `services/InvalidMessageConsumer/Program.cs`
 
 </td>
 </tr>
@@ -121,7 +156,11 @@ Catalog udskilt i trin; systemet virkede efter hvert trin:
 
 - Én `<service>.yml` pr. service, trigges kun af egen mappe → bygges og testes uafhængigt
 - Docker-image pr. service; hele systemet kører i Docker Swarm (`docker-stack.yml`) eller, til udvikling, `docker-compose.yml`
+- Jobs: build → fast-tests (unit) → slow-tests (integration) → package → staging → deploy
 - Mangler: rigtig deploy (staging/production er i dag kun `echo`-trin, production med manuel godkendelse)
+  - `package` bygger et nyt image fra kildekoden uden registry → ikke det testede artifact
+  - Løsning: gem testet image i et registry, og lad deploy køre `docker service update` på Swarm (via SSH eller self-hosted runner) → bruger de rullende opdateringer
+- Rapport: *Uafhængig build, test og udrulning*, *Diskussion*
 
 </td>
 <td>
@@ -137,8 +176,15 @@ Catalog udskilt i trin; systemet virkede efter hvert trin:
 <td>Dokumentation af arkitekturbeslutninger, API'er og microservices (fx i README)</td>
 <td>
 
+- Denne README: krav, [CI/CD](#cicd-microservices), [EIP-patterns](#eip-patterns), [Test](#test)
+- Rapporten: begrundelse for hvert valg; *Diskussion* om bl.a. read-only kopi vs. shared database, monorepo vs. multi-repo, deploy og health checks
+- Diagrammer i `docs/`
+- Mangler: API-dokumentation (ingen Swagger/OpenAPI)
+
 </td>
 <td>
+
+`README.md`, `docs/messaging.drawio`, `docs/messaging-overview.drawio`
 
 </td>
 </tr>
@@ -168,7 +214,34 @@ Catalog udskilt i trin; systemet virkede efter hvert trin:
 
 Ny service: `services/<Service>/` med samme struktur + `<service>.yml`, der kalder `_dotnet-service.yml`.
 
+### Monorepo vs. multi-repo
+- Monorepo valgt: ændringer på tværs (fx CatalogSyncConsumer sammen med CatalogServices events) kræver ingen koordinering mellem repositories
+- Multi-repo-fordelen (uafhængige pipelines) opnås via path filters
+- Bagside: grænsen håndhæves kun af path filters og disciplin; intet forhindrer en service i at referere direkte til en andens kode
+
+## Test
+
+Testpyramiden: mange hurtige unit tests, færre langsomme integrationstests.
+
+| Niveau | Hvad | Job i CI | Kode |
+|---|---|---|---|
+| Unit | `CatalogEvents` isoleret; `IEventBus` er mock → tjekker routing key og at `Publish` kaldes én gang | `fast-tests` | `services/CatalogService/tests/CatalogService.UnitTests/` |
+| Integration | Endpoints + forretningslogik + database via `WebApplicationFactory`; Postgres → in-memory, `ICatalogEvents` → mock | `slow-tests` (kun efter `fast-tests`) | `services/CatalogService/tests/CatalogService.IntegrationTests/` |
+
+- Mangler: containerbaserede integrationstests (rigtig Postgres/RabbitMQ) og end-to-end tests (klient → ReverseProxy → CatalogService → monolitten)
+- Asynkron kommunikation testes derfor kun op til Messaging Gatewayen
+- Rapport: *Test af microservices og asynkron kommunikation*
+
 ## EIP-patterns (Hohpe & Woolf) 
+
+Kun patterns, der bruges i projektet og nævnes i rapporten (afsnit *Asynkron kommunikation mellem microservices* og *Monitorering og observability af microservices*).
+
+| Kategori | Patterns |
+|---|---|
+| Grundprincipper | Send and forget, store and forward |
+| Message Channels | Publish-Subscribe Channel, Point-to-Point Channel, Guaranteed Delivery, Invalid Message Channel |
+| Message Construction | Event Message, Document Message |
+| Message Endpoints | Messaging Gateway, Messaging Mapper, Durable Subscriber, Idempotent Receiver, Competing Consumers (forberedt) |
 
 ### EIP vs. RabbitMQ (begreber)
 
@@ -187,24 +260,12 @@ EIP beskriver *mønstre*, RabbitMQ har *byggeklodser*. Samme ord betyder ikke al
 
 | EIP | RabbitMQ | Hos os |
 |---|---|---|
-| Message Channel | Ingen enkelt ting: exchange + binding + queue | – |
 | Publish-Subscribe Channel | Exchange (input) + én kø pr. subscriber (output) | `catalog` (topic) → `monolith.catalog` |
 | Point-to-Point Channel | Én kø; hver besked går til én consumer | `monolith.catalog.invalid` via default exchange |
-| Message Router | Exchange-typen (direct, topic, fanout, headers) | Topic-routing på `catalog.item.*` (RabbitMQ gør det) |
-| Subscription | Binding (exchange → kø, med binding key) | `catalog.item.*` |
-| Message | Body + properties (`delivery_mode`, `content_type`, `correlation_id` …) + routing key ved publish | JSON-body, persistent |
-| Message Endpoint | Klientkode med connection + channel | `RabbitMq.cs`, `CatalogSyncConsumer.cs`, `InvalidMessageConsumer` |
-| Messaging system | Broker (vhost `/`) | `rabbitmq:4-management` |
 | Guaranteed Delivery | Durable exchange/kø + persistent besked (+ publisher confirms) | Ja, men uden publisher confirms |
 | Durable Subscriber | Durable kø, ikke exclusive/auto-delete, navngivet efter service | `monolith.catalog` |
-| Event-Driven Consumer | `BasicConsume` (broker pusher) | Ja |
-| Polling Consumer | `BasicGet` (klienten spørger) | *(ikke brugt)* |
 | Competing Consumers | Flere consumers på samme kø + `prefetchCount` | Kun ved flere monolit-replicas |
 | Invalid Message Channel | Intet indbygget: almindelig kø, consumeren selv publicerer til | `monolith.catalog.invalid` |
-| Dead Letter Channel | DLX: `x-dead-letter-exchange` (+ `x-delivery-limit` på quorum queue) | *(fravalgt)* |
-| Format Indicator | `content_type` / `type` property | *(ikke brugt)* |
-| Correlation Identifier / Return Address | `correlation_id` / `reply_to` | *(ikke brugt, ingen Request-Reply)* |
-| Message Expiration | TTL (`expiration`, `x-message-ttl`) | *(ikke brugt)* |
 
 ### Message Channels
 
@@ -259,45 +320,24 @@ EIP beskriver *mønstre*, RabbitMQ har *byggeklodser*. Samme ord betyder ikke al
 - `created`/`updated` = Event + Document (*push model*): hele itemet med → intet kald tilbage (*pull model*)
 - `deleted` = ren Event Message, kun `id`
 - `pictureUri` som færdig URL → monolitten behøver ingen catalog-logik
+- Bagside: `ToData` udvælger kun felter, monolitten bruger → formatet er tilpasset monolitten (afhængighed i dataformatet)
 - Kode: `CatalogEvents.cs` (`ToData`)
 
-**Format Indicator** *(ikke brugt)*
-- *Definition:* felt, der angiver beskedens format (versionsnr., schema-reference eller schema)
-- Vores `version` = **itemets** version, ikke formatets
-- Relevant, hvis formatet ændres og gamle/nye consumers skal leve side om side (fx `formatVersion: 2`)
-
 ### Message Endpoints
-
-**Message Endpoint**
-- *Definition:* koden, der forbinder en applikation med en kanal
-- CatalogService (sender), monolitten (modtager)
-- Kode: `services/CatalogService/CatalogService.Api/Messaging/`, `src/PublicApi/Messaging/`
 
 **Messaging Gateway**
 - *Definition:* klasse, der skjuler messaging bag domænemetoder
 - `ICatalogEvents.CatalogItemCreated(item)` osv.; endpoints kender ikke RabbitMQ, routing keys eller JSON
-- Udskiftelig: integrationstests bruger `Mock.Of<ICatalogEvents>()`
-- vs. **Channel Adapter** *(ikke brugt)*: Adapter kobler appen til messaging udefra via dens API eller data (fx CDC/Debezium på databasen); Gateway ligger i appens egen kode → vi har kildekoden til både CatalogService og monolitten og kan ændre den direkte
-- Kun i CatalogService: i monolitten er messaging isoleret i `CatalogSyncConsumer`, men der er intet domæneinterface, som monolitten kalder → Event-Driven Consumer + Messaging Mapper + Service Activator, ikke gateway
-- Kode: `Interfaces/ICatalogEvents.cs`, `Messaging/CatalogEvents.cs`, `tests/CatalogService.IntegrationTests/CatalogServiceFactory.cs`
+- Skift af kommunikationsmetode kræver kun ændringer bag gatewayen
+- Udskiftelig: integrationstests bruger `Mock.Of<ICatalogEvents>()`; selve gatewayen sender via `IEventBus` (`RabbitMq`), som unit tests mocker
+- Kun i CatalogService: i monolitten er messaging isoleret i `CatalogSyncConsumer`, men der er intet domæneinterface, som monolitten kalder → ikke en gateway
+- Kode: `Interfaces/ICatalogEvents.cs`, `Interfaces/IEventBus.cs`, `Messaging/CatalogEvents.cs`, `services/CatalogService/tests/CatalogService.IntegrationTests/CatalogServiceFactory.cs`, `services/CatalogService/tests/CatalogService.UnitTests/Messaging/CatalogEventsTests.cs`
 
 **Messaging Mapper**
 - *Definition:* flytter data mellem domæneobjekter og beskeder; ingen af dem kender den anden
 - Publisher: `ToData` (`CatalogItem` → `item`, `ComposePicUri` → færdig URL); deleted beregner `version + 1`; JSON i `RabbitMq.Publish`
 - Consumer: JSON → `CatalogEventMessage` → `FromCatalogService(...)` / `SyncFromCatalogService(...)`; entiteten får kun primitive værdier
-- vs. **Message Translator** *(ikke brugt)*: Translator = besked → anden besked mellem kanaler; Mapper = domæneobjekt ↔ besked i endpointet
 - Kode: `CatalogEvents.cs` (`ToData`), `CatalogSyncConsumer.cs` (`HandleMessage`)
-
-**Event-Driven Consumer**
-- *Definition:* får beskeder leveret automatisk (vs. Polling Consumer, der selv spørger)
-- `BackgroundService` + `AsyncEventingBasicConsumer`; RabbitMQ pusher → `ReceivedAsync`
-- Kode: `CatalogSyncConsumer.cs` (`ReceivedAsync`)
-
-**Service Activator**
-- *Definition:* forbinder beskeder på en kanal med en service, der også kan kaldes uden messaging; kalder den som en hvilken som helst anden klient (kan være et simpelt metodekald)
-- Envejs (ingen Request-Reply): besked → `IRepository<CatalogItem>` + `CatalogItem.FromCatalogService` / `SyncFromCatalogService`
-- Repository og entitet kender ikke RabbitMQ; samme repository bruges af resten af monolitten
-- Kode: `CatalogSyncConsumer.cs` (`HandleMessage`)
 
 **Durable Subscriber**
 - *Definition:* Pub-Sub-subscriber, hvis beskeder gemmes, mens den er afkoblet
@@ -308,15 +348,14 @@ EIP beskriver *mønstre*, RabbitMQ har *byggeklodser*. Samme ord betyder ikke al
 **Idempotent Receiver**
 - *Definition:* samme besked kan modtages flere gange uden gentaget effekt
 - `version <= gemt` → ignorér → dækker dubletter (genlevering efter manglende ack)
-- Afviser også forældede events i forkert rækkefølge (ud over ren idempotens) → erstatter Resequencer
-- Resequencer fravalgt: kræver ubrudt sekvens → ét tabt event blokerer resten. Document Messages med hele tilstanden → nok at droppe forældede
+- Afviser også forældede events i forkert rækkefølge (fx to CatalogService-replicas, der ændrer samme item kort efter hinanden)
 - Tombstone (`IsDeleted`) → forsinket `updated` genopliver ikke et slettet item
 - Kode: `CatalogSyncConsumer.cs` (`HandleMessage`), `src/ApplicationCore/Entities/CatalogItem.cs`
 
 **Competing Consumers**
 - *Definition:* flere consumers på samme kanal; hver besked behandles af kun én
 - Kun relevant, når monolitten skaleres: replicas deler `monolith.catalog`
-- `prefetchCount: 1`: max 1 uacked besked pr. consumer → jævn fordeling (ledig replica tager næste), kun 1 genlevering ved crash. Uden: én replica kan få hele køen, mens de andre står stille
+- `prefetchCount: 1`: max 1 uacked besked pr. consumer → jævn fordeling (ledig replica tager næste), kun 1 genlevering ved crash. Uden: RabbitMQ fordeler med round robin uanset hvor travle de er
 - CatalogService er ikke consumer; skaleres via HTTP (replicas bag gatewayen)
 - `Version` som concurrency token → replicas overskriver ikke hinanden
 - Kode: `CatalogSyncConsumer.cs` (`BasicQosAsync`), `src/Infrastructure/Data/Config/CatalogItemConfiguration.cs`
